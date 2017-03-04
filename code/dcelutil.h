@@ -10,6 +10,8 @@ struct HalfEdge;
 struct Vertex {  
   double X;
   double Y;
+  HalfEdge *outer;
+  
   Vertex(){}
   Vertex(double _x, double _y) : X(_x), Y(_y) {}
   Vertex operator + (const Vertex &p)  const { return Vertex(X + p.X, Y + p.Y); }
