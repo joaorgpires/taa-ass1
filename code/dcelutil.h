@@ -2,6 +2,9 @@
 #define dcelutil_h
 
 #include <math.h>
+#include <list>
+
+using namespace std;
 
 struct Vertex;
 struct Face;
@@ -23,11 +26,12 @@ struct Vertex {
 double dist(Vertex v1, Vertex v2);
 
 struct Face {
-  HalfEdge *f;
+  HalfEdge *outer;
+  list<HalfEdge *> inner;
 };
 
 struct HalfEdge {
-  Vertex *target;
+  Vertex *origin;
   Face *incident;
   HalfEdge *twin;
   HalfEdge *prev;

@@ -5,9 +5,9 @@ using namespace std;
 
 double dist(Vertex v1, Vertex v2) 
 {
-  double q1 = v2.X - v1.X, q2 = v2.Y - v1.Y;
+  Vertex q = Vertex(v2 - v1);
 
-  return sqrt(q1 * q1 + q2 * q2);
+  return sqrt(q.X * q.X + q.Y * q.Y);
 }
 
 int main() 
