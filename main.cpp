@@ -15,8 +15,7 @@ int main() {
     P.push_back(p);
   }
 
-  for(int i = 0; i < n_vertices; i++)
-    cout << P[i].X << " " << P[i].Y << endl;
+  dcel *partition = new dcel();
 
   return 0;
 }

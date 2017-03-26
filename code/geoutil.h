@@ -15,15 +15,13 @@ struct Point {
   Point operator / (double c) const { return Point(X / c, Y / c); }
 };
 
-struct Segment
-{
-  Point p0, p1;
+struct Segment {
+  Point p1, p2;
   Segment(){}
-  Segment(Point _p0, Point _p1) : p0(_p0), p1(_p1) {}
+  Segment(Point _p1, Point _p2) : p1(_p1), p2(_p2) {}
 };
 
-struct Line
-{
+struct Line {
   double a, b, c; // ax + by = c
   Line(){}
   Line(double _a, double _b, double _c) : a(_a), b(_b), c(_c) {}

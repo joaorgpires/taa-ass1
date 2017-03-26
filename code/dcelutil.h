@@ -8,26 +8,45 @@
 
 using namespace std;
 
-struct Vertex;
-struct Face;
-struct HalfEdge;
+class dcel {
+public:
+  dcel();
 
-struct Vertex {
-  Point coord;
-  HalfEdge *outer;
-};
+  void init_poly(Polygon p);
 
-struct Face {
-  HalfEdge *outer;
-  int index;
-};
+private:
+  struct Vertex;
+  struct Face;
+  struct HalfEdge;
 
-struct HalfEdge {
-  Vertex *origin;
-  Face *incident;
-  HalfEdge *twin;
-  HalfEdge *prev;
-  HalfEdge *next;
+  struct Vertex {
+    Point coord;
+    HalfEdge *outer;
+  };
+
+  struct Face {
+    HalfEdge *outer;
+    int index;
+  };
+
+  struct HalfEdge {
+    Vertex *origin;
+    Vertex *destin;
+    Face *incident;
+    HalfEdge *twin;
+    HalfEdge *prev;
+    HalfEdge *next;
+
+    Segment edge() {
+      return Segment(origin->coord, destin->coord);
+    }
+  };
+
+  Face *out_face;
+
+  int face_index;
+
+  Vertex *create_vertex_from(HalfEdge *edge, Point coord);
 };
 
 #endif

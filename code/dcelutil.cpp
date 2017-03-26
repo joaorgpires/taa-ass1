@@ -3,15 +3,19 @@
 
 using namespace std;
 
-int main() {
-  double x1, y1, x2, y2;
+dcel::dcel() {
+  face_index = 0;
+  out_face = NULL;
+}
 
-  cin >> x1 >> y1 >> x2 >> y2;
-  Point v1 = Point(x1, y1), v2 = Point(x2, y2);
+void dcel::init_poly(Polygon p) {
 
-  cout << v1.X << " " << v2.X << endl;
+}
 
-  cout << v1.Y << " " << v2.Y << endl;
+dcel::Vertex *dcel::create_vertex_from(HalfEdge *edge, Point coord) {
+  Vertex *v = new Vertex();
+  v->outer = edge;
+  v->coord = coord;
 
-  return 0;
+  return v;
 }
