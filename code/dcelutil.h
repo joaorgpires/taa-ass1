@@ -2,8 +2,8 @@
 #define dcelutil_h
 
 #include <math.h>
-#include <list>
 #include <vector>
+#include <set>
 #include "geoutil.h"
 
 using namespace std;
@@ -13,6 +13,7 @@ public:
   dcel();
 
   void init_poly(Polygon p);
+  void print_dcel();
 
 private:
   struct Vertex;
@@ -22,6 +23,7 @@ private:
   struct Vertex {
     Point coord;
     HalfEdge *outer;
+    int index;
   };
 
   struct Face {
@@ -41,11 +43,16 @@ private:
     }
   };
 
-  Face *out_face;
+  Face *out_face, *in_face;
 
   int face_index;
+  int vertex_index;
+  set<int> visited_faces;
+  vector<Vertex*> vertices;
+  vector<Face*> faces;
 
   Vertex *create_vertex_from(HalfEdge *edge, Point coord);
+  void find_faces(Face *face);
 };
 
 #endif
