@@ -16,6 +16,7 @@ int main() {
   }
 
   dcel *partition = new dcel();
+  partition->init_poly(P);
 
   return 0;
 }

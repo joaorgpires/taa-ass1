@@ -31,14 +31,13 @@ private:
 
   struct HalfEdge {
     Vertex *origin;
-    Vertex *destin;
     Face *incident;
     HalfEdge *twin;
     HalfEdge *prev;
     HalfEdge *next;
 
     Segment edge() {
-      return Segment(origin->coord, destin->coord);
+      return Segment(origin->coord, twin->origin->coord);
     }
   };
 
