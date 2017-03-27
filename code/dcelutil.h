@@ -14,6 +14,7 @@ public:
 
   void init_poly(Polygon p);
   void print_dcel();
+  void sweep_line();
 
 private:
   struct Vertex;
@@ -50,9 +51,12 @@ private:
   set<int> visited_faces;
   vector<Vertex*> vertices;
   vector<Face*> faces;
+  vector<HalfEdge*> events;
 
   Vertex *create_vertex_from(HalfEdge *edge, Point coord);
   void find_faces(Face *face);
+  void add_event(HalfEdge *edge);
+  static bool comp(const HalfEdge *a, const HalfEdge *b);
 };
 
 #endif

@@ -18,6 +18,7 @@ int main() {
   dcel *partition = new dcel();
   partition->init_poly(P);
   partition->print_dcel();
+  partition->sweep_line();
 
   return 0;
 }

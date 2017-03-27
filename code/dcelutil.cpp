@@ -5,6 +5,8 @@
 
 using namespace std;
 
+//Idea for holes: guardar os indices das outer faces dos holes, depois fica facil imprimir (tenho uma halfedge a representar aquilo e depois posso usar as twins)
+
 dcel::dcel() {
   face_index = 0;
   vertex_index = 0;
@@ -29,12 +31,14 @@ void dcel::init_poly(Polygon p) {
     next->prev = cur;
     cur->incident = in_face;
     next->origin = create_vertex_from(next, p[i]);
+    add_event(cur);
     cur = next;
   }
 
   cur->next = first;
   first->prev = cur;
   cur->incident = in_face;
+  add_event(cur);
 
   for(int i = 0; i < (int)p.size(); i++) {
     HalfEdge *next = new HalfEdge();
@@ -113,9 +117,9 @@ void dcel::print_dcel() {
   cout << endl << "------HALF EDGES------" << endl;
   w1 = 11;
   w2 = 8;
-  int w3 = 6;
+  int w3 = 9;
   int w4 = 15;
-  cout << "Half Edge: Origin: Twin: Incident Face: Next: Previous:" << endl;
+  cout << "Half Edge: Origin: Twin:    Incident Face: Next:    Previous:" << endl;
   for(int i = 0; i < face_index; i++) {
     HalfEdge *cur = faces[i]->outer;
     char s[20];
@@ -149,4 +153,22 @@ void dcel::print_dcel() {
       cur = cur->next;
     }
   }
+}
+
+void dcel::add_event(HalfEdge *edge) {
+  if(edge->origin->coord.Y == edge->next->origin->coord.Y) events.push_back(edge);
+
+  return;
+}
+
+bool dcel::comp(const HalfEdge *a, const HalfEdge *b) {
+  if(a->origin->coord.Y > b->origin->coord.Y) return true;
+  int mn1 = min(a->origin->coord.X, a->twin->origin->coord.X), mn2 = min(b->origin->coord.X, b->twin->origin->coord.X);
+  if(a->origin->coord.Y == b->origin->coord.Y && mn1 < mn2) return true;
+
+  return false;
+}
+
+void dcel::sweep_line() {
+  sort(events.begin(), events.end(), comp); //tested, ordering is ok
 }
