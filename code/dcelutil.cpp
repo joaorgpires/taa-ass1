@@ -67,7 +67,8 @@ dcel::Vertex *dcel::create_vertex_from(HalfEdge *edge, Point coord) {
   v->coord = coord;
   v->index = vertex_index++;
 
-  vertices.push_back(v);
+  pii pv = pii(coord.X, coord.Y);
+  vertices[pv] = v;
 
   return v;
 }
@@ -97,11 +98,11 @@ void dcel::print_dcel() {
   int w1 = 14;
   int w2 = 3;
   cout << "Vertex Index: X: Y: Outer edge:" << endl;
-  for(int i = 0; i < vertex_index; i++) {
-    cout << left << setw(w1) << setfill(sep) << vertices[i]->index;
-    cout << left << setw(w2) << setfill(sep) << vertices[i]->coord.X;
-    cout << left << setw(w2) << setfill(sep) << vertices[i]->coord.Y;
-    cout << "v" << vertices[i]->index << ",v" << vertices[i]->outer->twin->origin->index;
+  for(map<pii, Vertex*>::iterator it = vertices.begin(); it != vertices.end(); ++it) {
+    cout << left << setw(w1) << setfill(sep) << it->S->index;
+    cout << left << setw(w2) << setfill(sep) << it->S->coord.X;
+    cout << left << setw(w2) << setfill(sep) << it->S->coord.Y;
+    cout << "v" << it->S->index << ",v" << it->S->outer->twin->origin->index;
     cout << endl;
   }
 
@@ -156,7 +157,8 @@ void dcel::print_dcel() {
 }
 
 void dcel::add_event(HalfEdge *edge) {
-  if(edge->origin->coord.Y == edge->next->origin->coord.Y) events.push_back(edge);
+  if(edge->origin->coord.Y == edge->next->origin->coord.Y) eventsH.push_back(edge);
+  else eventsV.push_back(edge);
 
   return;
 }
@@ -170,5 +172,31 @@ bool dcel::comp(const HalfEdge *a, const HalfEdge *b) {
 }
 
 void dcel::sweep_line() {
-  sort(events.begin(), events.end(), comp); //tested, ordering is ok
+  sort(eventsH.begin(), eventsH.end(), comp); //tested, ordering is ok
+
+  HalfEdge *cur = eventsH[0];
+  HalfEdge *next = cur->next;
+  HalfEdge *prev = cur->prev;
+
+  Segment sn = next->edge(), sp = prev->edge();
+  linestate[pii(sn.p2.Y, sn.p2.X)] = next;
+  linestate[pii(sp.p2.Y, sp.p2.X)] = prev;
+
+  for(int i = 1; i < (int)eventsH.size(); i++) {
+    cur = eventsH[i];
+    next = cur->next;
+    prev = cur->prev;
+    map<pii, HalfEdge*>::iterator it = linestate.lower_bound(pii(cur->origin->coord.Y, -INF));
+    linestate.erase(linestate.begin(), it);
+
+    if(linestate.empty()) continue;
+
+    lld xmin = min(cur->origin->coord.X, cur->twin->origin->coord.X), xmax = max(cur->origin->coord.X, cur->twin->origin->coord.X);
+
+    //Usar a tactica que tens no caderno para ver se a halfedge a esquerda ou a direita e dentro ou fora
+
+    sn = next->edge(); sp = prev->edge();
+    linestate[pii(sn.p2.Y, sn.p2.X)] = next;
+    linestate[pii(sp.p2.Y, sp.p2.X)] = prev;
+  }
 }

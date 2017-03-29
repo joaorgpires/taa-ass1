@@ -1,14 +1,18 @@
 #ifndef geoutil_h
 #define geoutil_h
 
+#define INF 1000000000
+
 using namespace std;
 
+typedef long long int lld;
+
 struct Point {
-  double X;
-  double Y;
+  lld X;
+  lld Y;
 
   Point(){}
-  Point(double _x, double _y) : X(_x), Y(_y){}
+  Point(lld _x, lld _y) : X(_x), Y(_y){}
   Point operator + (const Point &p)  const { return Point(X + p.X, Y + p.Y); }
   Point operator - (const Point &p)  const { return Point(X - p.X, Y - p.Y); }
   Point operator * (double c) const { return Point(X * c, Y * c); }
@@ -24,7 +28,7 @@ struct Segment {
 struct Line {
   double a, b, c; // ax + by = c
   Line(){}
-  Line(double _a, double _b, double _c) : a(_a), b(_b), c(_c) {}
+  Line(lld _a, lld _b, lld _c) : a(_a), b(_b), c(_c) {}
 };
 
 typedef vector<Point> Polygon;

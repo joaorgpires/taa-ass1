@@ -4,7 +4,13 @@
 #include <math.h>
 #include <vector>
 #include <set>
+#include <map>
 #include "geoutil.h"
+
+#define F first
+#define S second
+
+typedef pair<lld, lld> pii;
 
 using namespace std;
 
@@ -40,7 +46,28 @@ private:
     HalfEdge *next;
 
     Segment edge() {
-      return Segment(origin->coord, twin->origin->coord);
+      Point p1, p2;
+      if(origin->coord.X == twin->origin->coord.X) {
+        if(origin->coord.Y < twin->origin->coord.Y) {
+          p1 = origin->coord;
+          p2 = twin->origin->coord;
+        }
+        else {
+          p2 = origin->coord;
+          p1 = twin->origin->coord;
+        }
+      }
+      else {
+        if(origin->coord.X < twin->origin->coord.X) {
+          p1 = origin->coord;
+          p2 = twin->origin->coord;
+        }
+        else {
+          p2 = origin->coord;
+          p1 = twin->origin->coord;
+        }
+      }
+      return Segment(p1, p2);
     }
   };
 
@@ -49,9 +76,12 @@ private:
   int face_index;
   int vertex_index;
   set<int> visited_faces;
-  vector<Vertex*> vertices;
+  //vector<Vertex*> vertices;
   vector<Face*> faces;
-  vector<HalfEdge*> events;
+  vector<HalfEdge*> eventsH;
+  vector<HalfEdge*> eventsV;
+  map<pii, Vertex*> vertices;
+  map<pii, HalfEdge*> linestate;
 
   Vertex *create_vertex_from(HalfEdge *edge, Point coord);
   void find_faces(Face *face);

@@ -10,15 +10,15 @@ int main() {
   int n_vertices; cin >> n_vertices;
 
   for(int i = 0; i < n_vertices; i++) {
-    double x, y; cin >> x >> y;
+    lld x, y; cin >> x >> y;
     Point p = Point(x, y);
     P.push_back(p);
   }
 
   dcel *partition = new dcel();
   partition->init_poly(P);
-  partition->print_dcel();
   partition->sweep_line();
+  partition->print_dcel();
 
   return 0;
 }
