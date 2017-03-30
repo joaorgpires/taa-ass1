@@ -49,12 +49,12 @@ private:
       Point p1, p2;
       if(origin->coord.X == twin->origin->coord.X) {
         if(origin->coord.Y < twin->origin->coord.Y) {
-          p1 = origin->coord;
-          p2 = twin->origin->coord;
-        }
-        else {
           p2 = origin->coord;
           p1 = twin->origin->coord;
+        }
+        else {
+          p1 = origin->coord;
+          p2 = twin->origin->coord;
         }
       }
       else {
