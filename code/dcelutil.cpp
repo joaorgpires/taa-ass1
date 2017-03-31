@@ -266,7 +266,7 @@ void dcel::sweep_line() {
     prev = cur->prev;
     Segment sc = cur->edge();
 
-    map<pii, HalfEdge*>::iterator it = linestate.find(pii(sc.p1.X, sc.p1.Y));
+    map<pii, HalfEdge*>::iterator it = linestate.lower_bound(pii(sc.p1.X, sc.p1.Y));
 
     if(it != linestate.begin()) {
       it--;
