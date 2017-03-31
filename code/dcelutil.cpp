@@ -109,7 +109,7 @@ void dcel::print_dcel() {
   cout << endl << "------FACES------" << endl;
   w1 = 12;
   cout << "Face Index: Outer edge:" << endl;
-  for(int i = 0; i < face_index; i++) {
+  for(int i = 0; i < (int)faces.size(); i++) {
     cout << left << setw(w1) << setfill(sep) << faces[i]->index;
     cout << "v" << faces[i]->outer->origin->index << ",v" << faces[i]->outer->twin->origin->index;
     cout << endl;
@@ -201,14 +201,14 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   HalfEdge *e6 = new HalfEdge();
 
   e1->origin = split->origin;
-  if(split->origin->outer == split) split->origin->outer = e1;
+  split->origin->outer = e1;
   e1->incident = split->incident;
   split->incident->outer = e1;
   e1->twin = e3;
   e1->prev = prev;
   prev->next = e1;
   e1->next = e5;
-  eventsV.push_back(e1);
+  //eventsV.push_back(e1);
 
   Vertex *newv = create_vertex_from(e2, Point(x, y));
   e2->origin = newv;
@@ -218,13 +218,13 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   next->prev = e2;
   event->next = e6;
   e6->next = e2;
-  eventsV.push_back(e2);
+  //eventsV.push_back(e2);
   linestate[pii(split->edge().p2.X, split->edge().p2.Y)] = e2;
   Face *newf = create_face_from(e2);
 
   e3->origin = newv;
   e3->incident = split->twin->incident;
-  if(split->twin->incident->outer == split) split->twin->incident->outer = e3;
+  split->twin->incident->outer = e3;
   e3->twin = e1;
   e3->prev = e4;
   e3->next = prev->twin;
@@ -247,6 +247,65 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   e6->origin = event->twin->origin;
   e6->twin = e5;
   e6->prev = event;
+}
+
+void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y) {
+  HalfEdge *prev = split->prev;
+  HalfEdge *next = split->next;
+  HalfEdge *evprev = prev->next;
+
+  HalfEdge *e1 = new HalfEdge();
+  HalfEdge *e2 = new HalfEdge();
+  HalfEdge *e3 = new HalfEdge();
+  HalfEdge *e4 = new HalfEdge();
+  HalfEdge *e5 = new HalfEdge();
+  HalfEdge *e6 = new HalfEdge();
+
+  Vertex *newv = create_vertex_from(e1, Point(x, y));
+  e1->origin = newv;
+  e1->incident = split->incident;
+  split->incident->outer = e1;
+  e1->twin = e3;
+  e1->prev = e5;
+  e1->next = next;
+  next->prev = e1;
+
+  e2->origin = split->origin;
+  split->origin->outer = e2;
+  e2->twin = e4;
+  e2->prev = prev;
+  prev->next = e2;
+  e2->next = e6;
+  e6->next = event;
+  linestate[pii(split->edge().p2.X, split->edge().p2.Y)] = e2;
+  Face *newf = create_face_from(e2);
+
+  e3->origin = split->twin->origin;
+  split->twin->origin->outer = e3;
+  e3->incident = split->twin->incident;
+  split->twin->incident->outer = e3;
+  e3->twin = e1;
+  e3->prev = prev;
+  prev->next = e3;
+  e3->next = e4;
+
+  e4->origin = newv;
+  e4->incident = split->twin->incident;
+  e4->twin = e2;
+  e4->prev = e3;
+  e4->next = prev->twin;
+  prev->twin = e4;
+
+  e5->origin = event->origin;
+  e5->incident = split->incident;
+  e5->twin = e6;
+  e5->prev = evprev;
+  evprev->next = e5;
+  e5->next = e1;
+
+  e6->origin = newv;
+  e6->twin = e5;
+  e6->prev = e2;
 }
 
 void dcel::sweep_line() {
@@ -275,6 +334,23 @@ void dcel::sweep_line() {
           HalfEdge *split = it->S;
           linestate.erase(it);
           splitHalfEdgeL(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
+        }
+      }
+    }
+
+    it = linestate.lower_bound(pii(sc.p2.X, sc.p2.Y));
+
+    map<pii, HalfEdge*>::iterator itlast = linestate.end();
+    itlast--;
+
+    if(it != itlast && it != linestate.end()) {
+      it++;
+      if(it->S->origin->coord.Y < sc.p2.Y) {
+        if(vertices.find(pii(it->S->origin->coord.X, sc.p2.Y)) == vertices.end()) {
+          HalfEdge *split = it->S;
+          linestate.erase(it);
+          splitHalfEdgeR(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
+          cout << "splitHalfEdgeR bugged." << endl;
         }
       }
     }
