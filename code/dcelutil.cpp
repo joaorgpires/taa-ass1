@@ -191,6 +191,7 @@ dcel::Face *dcel::create_face_from(HalfEdge *e) {
 void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   HalfEdge *prev = split->prev;
   HalfEdge *next = split->next;
+  HalfEdge *evnext = event->next;
 
   HalfEdge *e1 = new HalfEdge();
   HalfEdge *e2 = new HalfEdge();
@@ -202,7 +203,7 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   e1->origin = split->origin;
   if(split->origin->outer == split) split->origin->outer = e1;
   e1->incident = split->incident;
-  if(split->incident->outer == split) split->incident->outer = e1;
+  split->incident->outer = e1;
   e1->twin = e3;
   e1->prev = prev;
   prev->next = e1;
@@ -240,7 +241,7 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   e5->incident = split->incident;
   e5->twin = e6;
   e5->prev = e1;
-  e5->next = event->next;
+  e5->next = evnext;
   event->next->prev = e5;
 
   e6->origin = event->twin->origin;
