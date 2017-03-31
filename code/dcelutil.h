@@ -87,6 +87,8 @@ private:
   void find_faces(Face *face);
   void add_event(HalfEdge *edge);
   static bool comp(const HalfEdge *a, const HalfEdge *b);
+  void splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y);
+  Face *create_face_from(HalfEdge *e);
 };
 
 #endif

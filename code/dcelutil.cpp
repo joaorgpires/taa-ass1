@@ -171,6 +171,83 @@ bool dcel::comp(const HalfEdge *a, const HalfEdge *b) {
   return false;
 }
 
+dcel::Face *dcel::create_face_from(HalfEdge *e) {
+  Face *f = new Face();
+  f->outer = e;
+  f->index = face_index++;
+
+  e->incident = f;
+
+  HalfEdge *cur = e->next;
+
+  while(cur != e) {
+    cur->incident = f;
+    cur = cur->next;
+  }
+
+  return f;
+}
+
+void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
+  HalfEdge *prev = split->prev;
+  HalfEdge *next = split->next;
+
+  HalfEdge *e1 = new HalfEdge();
+  HalfEdge *e2 = new HalfEdge();
+  HalfEdge *e3 = new HalfEdge();
+  HalfEdge *e4 = new HalfEdge();
+  HalfEdge *e5 = new HalfEdge();
+  HalfEdge *e6 = new HalfEdge();
+
+  e1->origin = split->origin;
+  if(split->origin->outer == split) split->origin->outer = e1;
+  e1->incident = split->incident;
+  if(split->incident->outer == split) split->incident->outer = e1;
+  e1->twin = e3;
+  e1->prev = prev;
+  prev->next = e1;
+  e1->next = e5;
+  eventsV.push_back(e1);
+
+  Vertex *newv = create_vertex_from(e2, Point(x, y));
+  e2->origin = newv;
+  e2->twin = e4;
+  e2->prev = e6;
+  e2->next = next;
+  next->prev = e2;
+  event->next = e6;
+  e6->next = e2;
+  eventsV.push_back(e2);
+  linestate[pii(split->edge().p2.X, split->edge().p2.Y)] = e2;
+  Face *newf = create_face_from(e2);
+
+  e3->origin = newv;
+  e3->incident = split->twin->incident;
+  if(split->twin->incident->outer == split) split->twin->incident->outer = e3;
+  e3->twin = e1;
+  e3->prev = e4;
+  e3->next = prev->twin;
+  prev->twin->prev = e3;
+
+  e4->origin = split->twin->origin;
+  e4->incident = split->twin->incident;
+  e4->twin = e2;
+  e4->prev = next->twin;
+  e4->next = e3;
+  next->twin->next = e4;
+
+  e5->origin = newv;
+  e5->incident = split->incident;
+  e5->twin = e6;
+  e5->prev = e1;
+  e5->next = event->next;
+  event->next->prev = e5;
+
+  e6->origin = event->twin->origin;
+  e6->twin = e5;
+  e6->prev = event;
+}
+
 void dcel::sweep_line() {
   sort(eventsH.begin(), eventsH.end(), comp); //tested, ordering is ok
 
@@ -179,24 +256,34 @@ void dcel::sweep_line() {
   HalfEdge *prev = cur->prev;
 
   Segment sn = next->edge(), sp = prev->edge();
-  linestate[pii(sn.p2.Y, sn.p2.X)] = next;
-  linestate[pii(sp.p2.Y, sp.p2.X)] = prev;
+  linestate[pii(sn.p2.X, sn.p2.Y)] = next;
+  linestate[pii(sp.p2.X, sp.p2.Y)] = prev;
 
   for(int i = 1; i < (int)eventsH.size(); i++) {
     cur = eventsH[i];
     next = cur->next;
     prev = cur->prev;
-    map<pii, HalfEdge*>::iterator it = linestate.lower_bound(pii(cur->origin->coord.Y, -INF));
-    linestate.erase(linestate.begin(), it);
+    Segment sc = cur->edge();
 
-    if(linestate.empty()) continue;
+    map<pii, HalfEdge*>::iterator it = linestate.find(pii(sc.p1.X, sc.p1.Y));
 
-    lld xmin = min(cur->origin->coord.X, cur->twin->origin->coord.X), xmax = max(cur->origin->coord.X, cur->twin->origin->coord.X);
+    if(it != linestate.begin()) {
+      it--;
+      if(it->S->origin->coord.Y > sc.p2.Y) {
+        if(vertices.find(pii(it->S->origin->coord.X, sc.p2.Y)) == vertices.end()) {
+          HalfEdge *split = it->S;
+          linestate.erase(it);
+          splitHalfEdgeL(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
+        }
+      }
+    }
 
-    //Usar a tactica que tens no caderno para ver se a halfedge a esquerda ou a direita e dentro ou fora
+    linestate.erase(pii(sc.p1.X, sc.p1.Y));
+    linestate.erase(pii(sc.p2.X, sc.p2.Y));
 
     sn = next->edge(); sp = prev->edge();
-    linestate[pii(sn.p2.Y, sn.p2.X)] = next;
-    linestate[pii(sp.p2.Y, sp.p2.X)] = prev;
+
+    if(sn.p2.Y != sc.p2.Y) linestate[pii(sn.p2.X, sn.p2.Y)] = next;
+    if(sp.p2.Y != sc.p2.Y) linestate[pii(sp.p2.X, sp.p2.Y)] = prev;
   }
 }
