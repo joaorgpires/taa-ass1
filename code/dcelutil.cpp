@@ -242,7 +242,7 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   e5->twin = e6;
   e5->prev = e1;
   e5->next = evnext;
-  event->next->prev = e5;
+  evnext->prev = e5;
 
   e6->origin = event->twin->origin;
   e6->twin = e5;
@@ -301,7 +301,7 @@ void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   e5->incident = split->incident;
   e5->twin = e6;
   e5->prev = evprev;
-  event->prev->next = e5;
+  evprev->next = e5;
   e5->next = e1;
 
   e6->origin = newv;
