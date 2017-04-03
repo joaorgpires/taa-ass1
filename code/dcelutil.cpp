@@ -523,14 +523,25 @@ void dcel::sweep_line() {
     Segment sc = cur->edge();
 
     //DEBUG----------
-    cout << "Event: " << sc.p1.X << " " << sc.p1.Y << " " << sc.p2.X << " " << sc.p2.Y << endl;
+    //cout << "Event: " << sc.p1.X << " " << sc.p1.Y << " " << sc.p2.X << " " << sc.p2.Y << endl;
 
     sn = next->edge(); sp = prev->edge();
 
-    //If next going down, add it to map
-    if(sc.p2.Y > sn.p2.Y) linestate[pii(sn.p2.X, sn.p2.Y)] = next;
-    //If prev going down, add it to map
-    if(sc.p2.Y > sp.p2.Y) linestate[pii(sp.p2.X, sp.p2.Y)] = prev;
+    if(eventsH[i-1]->origin->coord.Y != cur->origin->coord.Y) {
+      //If next going down, add it to map
+      if(sc.p2.Y > sn.p2.Y) linestate[pii(sn.p2.X, sn.p2.Y)] = next;
+      //If prev going down, add it to map
+      if(sc.p2.Y > sp.p2.Y) linestate[pii(sp.p2.X, sp.p2.Y)] = prev;
+    }
+
+    if(i < (int)eventsH.size() - 1 && cur->origin->coord.Y == eventsH[i + 1]->origin->coord.Y) {
+      Segment sne = eventsH[i + 1]->next->edge();
+      Segment spe = eventsH[i + 1]->prev->edge();
+      //If next going down, add it to map
+      if(sc.p2.Y > sne.p2.Y) linestate[pii(sne.p2.X, sne.p2.Y)] = next;
+      //If prev going down, add it to map
+      if(sc.p2.Y > spe.p2.Y) linestate[pii(spe.p2.X, spe.p2.Y)] = prev;
+    }
 
     //Event from right to left
     if(cur->origin->coord.X == sc.p2.X) {
