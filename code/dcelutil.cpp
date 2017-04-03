@@ -84,11 +84,9 @@ void dcel::find_faces(Face *face) {
   HalfEdge *first = face->outer;
   HalfEdge *cur = first->next;
 
-  int n = 0;
-  while(cur != first && n != 15) {
+  while(cur != first) {
     find_faces(cur->twin->incident);
     cur = cur->next;
-    n++;
   }
 }
 
@@ -182,7 +180,6 @@ void dcel::create_face_from(HalfEdge *e) {
 
   HalfEdge *cur = e->next;
 
-
   while(cur != e) {
     cur->incident = f;
     cur = cur->next;
@@ -220,8 +217,6 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   event->next = e6;
   e6->next = e2;
   //eventsV.push_back(e2);
-  linestate[pii(split->edge().p2.X, split->edge().p2.Y)] = e2;
-  create_face_from(e2);
 
   e3->origin = newv;
   e3->incident = split->twin->incident;
@@ -250,6 +245,10 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   e6->prev = event;
 
   create_face_from(e1);
+  create_face_from(e2);
+
+  if(e1->edge().p2.Y > e2->edge().p2.Y) linestate[pii(split->edge().p2.X, split->edge().p2.Y)] = e2;
+  else linestate[pii(split->edge().p2.X, split->edge().p2.Y)] = e1;
 
   /*DEBUG----------
   cout << endl << "------HALF EDGES------" << endl;
@@ -362,16 +361,14 @@ void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   e2->next = e6;
   e6->next = event;
   event->prev = e6;
-  linestate[pii(split->edge().p2.X, split->edge().p2.Y)] = e2;
-  create_face_from(e2);
 
   e3->origin = split->twin->origin;
   split->twin->origin->outer = e3;
   e3->incident = split->twin->incident;
   split->twin->incident->outer = e3;
   e3->twin = e1;
-  e3->prev = next->twin;
-  next->twin->next = e3;
+  e3->prev = split->twin->prev;
+  split->twin->prev->next = e3;
   e3->next = e4;
 
   e4->origin = newv;
@@ -393,6 +390,9 @@ void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   e6->prev = e2;
 
   create_face_from(e1);
+  create_face_from(e2);
+  if(e1->edge().p2.Y > e2->edge().p2.Y) linestate[pii(split->edge().p2.X, split->edge().p2.Y)] = e2;
+  else linestate[pii(split->edge().p2.X, split->edge().p2.Y)] = e1;
 
   /*DEBUG-----------
   cout << endl << "------HALF EDGES------" << endl;
