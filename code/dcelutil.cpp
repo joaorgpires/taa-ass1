@@ -96,8 +96,8 @@ void dcel::print_dcel() {
   cout << "------VERTICES------" << endl;
   const char sep = ' ';
   int w1 = 14;
-  int w2 = 3;
-  cout << "Vertex Index: X: Y: Outer edge:" << endl;
+  int w2 = 10;
+  cout << "Vertex Index: X:        Y:        Outer edge:" << endl;
   for(map<pii, Vertex*>::iterator it = vertices.begin(); it != vertices.end(); ++it) {
     cout << left << setw(w1) << setfill(sep) << it->S->index;
     cout << left << setw(w2) << setfill(sep) << it->S->coord.X;
@@ -116,11 +116,11 @@ void dcel::print_dcel() {
   }
 
   cout << endl << "------HALF EDGES------" << endl;
-  w1 = 11;
-  w2 = 8;
-  int w3 = 9;
+  w1 = 13;
+  w2 = 12;
+  int w3 = 13;
   int w4 = 15;
-  cout << "Half Edge: Origin: Twin:    Incident Face: Next:    Previous:" << endl;
+  cout << "Half Edge:   Origin:     Twin:        Incident Face: Next:        Previous:" << endl;
   for(int i = 0; i < face_index; i++) {
     HalfEdge *cur = faces[i]->outer;
     char s[20];
@@ -171,7 +171,7 @@ bool dcel::comp(const HalfEdge *a, const HalfEdge *b) {
   return false;
 }
 
-dcel::Face *dcel::create_face_from(HalfEdge *e) {
+void dcel::create_face_from(HalfEdge *e) {
   Face *f = new Face();
   f->outer = e;
   f->index = face_index++;
@@ -184,8 +184,6 @@ dcel::Face *dcel::create_face_from(HalfEdge *e) {
     cur->incident = f;
     cur = cur->next;
   }
-
-  return f;
 }
 
 void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
@@ -220,7 +218,7 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   e6->next = e2;
   //eventsV.push_back(e2);
   linestate[pii(split->edge().p2.X, split->edge().p2.Y)] = e2;
-  Face *newf = create_face_from(e2);
+  create_face_from(e2);
 
   e3->origin = newv;
   e3->incident = split->twin->incident;
@@ -233,9 +231,9 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   e4->origin = split->twin->origin;
   e4->incident = split->twin->incident;
   e4->twin = e2;
-  e4->prev = next->twin;
+  e4->prev = split->twin->prev;
   e4->next = e3;
-  next->twin->next = e4;
+  split->twin->prev->next = e4;
 
   e5->origin = newv;
   e5->incident = split->incident;
@@ -247,6 +245,86 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   e6->origin = event->twin->origin;
   e6->twin = e5;
   e6->prev = event;
+
+  cout << "-----" << endl;
+  const char sep = ' ';
+  int w1 = 13;
+  int w2 = 12;
+  int w3 = 13;
+  int w4 = 15;
+  cout << "Half Edge:   Origin:     Twin:        Incident Face: Next:        Previous:" << endl;
+  char s[20];
+  sprintf(s, "v%d,v%d", e1->origin->index, e1->twin->origin->index);
+  cout << left << setw(w1) << setfill(sep) << s;
+  sprintf(s, "v%d", e1->origin->index);
+  cout << left << setw(w2) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e1->twin->origin->index, e1->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  cout << left << setw(w4) << setfill(sep) << e1->incident->index;
+  sprintf(s, "v%d,v%d", e1->next->origin->index, e1->next->twin->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e1->prev->origin->index, e1->prev->twin->origin->index);
+  cout << s << endl;
+
+  sprintf(s, "v%d,v%d", e2->origin->index, e2->twin->origin->index);
+  cout << left << setw(w1) << setfill(sep) << s;
+  sprintf(s, "v%d", e2->origin->index);
+  cout << left << setw(w2) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e2->twin->origin->index, e2->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  cout << left << setw(w4) << setfill(sep) << e2->incident->index;
+  sprintf(s, "v%d,v%d", e2->next->origin->index, e2->next->twin->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e2->prev->origin->index, e2->prev->twin->origin->index);
+  cout << s << endl;
+
+  sprintf(s, "v%d,v%d", e3->origin->index, e3->twin->origin->index);
+  cout << left << setw(w1) << setfill(sep) << s;
+  sprintf(s, "v%d", e3->origin->index);
+  cout << left << setw(w2) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e3->twin->origin->index, e3->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  cout << left << setw(w4) << setfill(sep) << e3->incident->index;
+  sprintf(s, "v%d,v%d", e3->next->origin->index, e3->next->twin->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e3->prev->origin->index, e3->prev->twin->origin->index);
+  cout << s << endl;
+
+  sprintf(s, "v%d,v%d", e4->origin->index, e4->twin->origin->index);
+  cout << left << setw(w1) << setfill(sep) << s;
+  sprintf(s, "v%d", e4->origin->index);
+  cout << left << setw(w2) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e4->twin->origin->index, e4->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  cout << left << setw(w4) << setfill(sep) << e4->incident->index;
+  sprintf(s, "v%d,v%d", e4->next->origin->index, e4->next->twin->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e4->prev->origin->index, e4->prev->twin->origin->index);
+  cout << s << endl;
+
+  sprintf(s, "v%d,v%d", e5->origin->index, e5->twin->origin->index);
+  cout << left << setw(w1) << setfill(sep) << s;
+  sprintf(s, "v%d", e5->origin->index);
+  cout << left << setw(w2) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e5->twin->origin->index, e5->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  cout << left << setw(w4) << setfill(sep) << e5->incident->index;
+  sprintf(s, "v%d,v%d", e5->next->origin->index, e5->next->twin->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e5->prev->origin->index, e5->prev->twin->origin->index);
+  cout << s << endl;
+
+  sprintf(s, "v%d,v%d", e6->origin->index, e6->twin->origin->index);
+  cout << left << setw(w1) << setfill(sep) << s;
+  sprintf(s, "v%d", e6->origin->index);
+  cout << left << setw(w2) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e6->twin->origin->index, e6->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  cout << left << setw(w4) << setfill(sep) << e6->incident->index;
+  sprintf(s, "v%d,v%d", e6->next->origin->index, e6->next->twin->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e6->prev->origin->index, e6->prev->twin->origin->index);
+  cout << s << endl;
 }
 
 void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y) {
@@ -279,7 +357,7 @@ void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   e6->next = event;
   event->prev = e6;
   linestate[pii(split->edge().p2.X, split->edge().p2.Y)] = e2;
-  Face *newf = create_face_from(e2);
+  create_face_from(e2);
 
   e3->origin = split->twin->origin;
   split->twin->origin->outer = e3;
@@ -294,8 +372,8 @@ void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   e4->incident = split->twin->incident;
   e4->twin = e2;
   e4->prev = e3;
-  e4->next = prev->twin;
-  prev->twin->prev = e4;
+  e4->next = split->twin->next;
+  split->twin->next->prev = e4;
 
   e5->origin = event->origin;
   e5->incident = split->incident;
@@ -307,6 +385,87 @@ void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   e6->origin = newv;
   e6->twin = e5;
   e6->prev = e2;
+
+  /*
+  cout << "-----" << endl;
+  const char sep = ' ';
+  int w1 = 13;
+  int w2 = 12;
+  int w3 = 13;
+  int w4 = 15;
+  cout << "Half Edge:   Origin:     Twin:        Incident Face: Next:        Previous:" << endl;
+  char s[20];
+  sprintf(s, "v%d,v%d", e1->origin->index, e1->twin->origin->index);
+  cout << left << setw(w1) << setfill(sep) << s;
+  sprintf(s, "v%d", e1->origin->index);
+  cout << left << setw(w2) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e1->twin->origin->index, e1->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  cout << left << setw(w4) << setfill(sep) << e1->incident->index;
+  sprintf(s, "v%d,v%d", e1->next->origin->index, e1->next->twin->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e1->prev->origin->index, e1->prev->twin->origin->index);
+  cout << s << endl;
+
+  sprintf(s, "v%d,v%d", e2->origin->index, e2->twin->origin->index);
+  cout << left << setw(w1) << setfill(sep) << s;
+  sprintf(s, "v%d", e2->origin->index);
+  cout << left << setw(w2) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e2->twin->origin->index, e2->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  cout << left << setw(w4) << setfill(sep) << e2->incident->index;
+  sprintf(s, "v%d,v%d", e2->next->origin->index, e2->next->twin->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e2->prev->origin->index, e2->prev->twin->origin->index);
+  cout << s << endl;
+
+  sprintf(s, "v%d,v%d", e3->origin->index, e3->twin->origin->index);
+  cout << left << setw(w1) << setfill(sep) << s;
+  sprintf(s, "v%d", e3->origin->index);
+  cout << left << setw(w2) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e3->twin->origin->index, e3->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  cout << left << setw(w4) << setfill(sep) << e3->incident->index;
+  sprintf(s, "v%d,v%d", e3->next->origin->index, e3->next->twin->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e3->prev->origin->index, e3->prev->twin->origin->index);
+  cout << s << endl;
+
+  sprintf(s, "v%d,v%d", e4->origin->index, e4->twin->origin->index);
+  cout << left << setw(w1) << setfill(sep) << s;
+  sprintf(s, "v%d", e4->origin->index);
+  cout << left << setw(w2) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e4->twin->origin->index, e4->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  cout << left << setw(w4) << setfill(sep) << e4->incident->index;
+  sprintf(s, "v%d,v%d", e4->next->origin->index, e4->next->twin->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e4->prev->origin->index, e4->prev->twin->origin->index);
+  cout << s << endl;
+
+  sprintf(s, "v%d,v%d", e5->origin->index, e5->twin->origin->index);
+  cout << left << setw(w1) << setfill(sep) << s;
+  sprintf(s, "v%d", e5->origin->index);
+  cout << left << setw(w2) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e5->twin->origin->index, e5->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  cout << left << setw(w4) << setfill(sep) << e5->incident->index;
+  sprintf(s, "v%d,v%d", e5->next->origin->index, e5->next->twin->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e5->prev->origin->index, e5->prev->twin->origin->index);
+  cout << s << endl;
+
+  sprintf(s, "v%d,v%d", e6->origin->index, e6->twin->origin->index);
+  cout << left << setw(w1) << setfill(sep) << s;
+  sprintf(s, "v%d", e6->origin->index);
+  cout << left << setw(w2) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e6->twin->origin->index, e6->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  cout << left << setw(w4) << setfill(sep) << e6->incident->index;
+  sprintf(s, "v%d,v%d", e6->next->origin->index, e6->next->twin->origin->index);
+  cout << left << setw(w3) << setfill(sep) << s;
+  sprintf(s, "v%d,v%d", e6->prev->origin->index, e6->prev->twin->origin->index);
+  cout << s << endl;*/
 }
 
 void dcel::sweep_line() {
@@ -326,15 +485,133 @@ void dcel::sweep_line() {
     prev = cur->prev;
     Segment sc = cur->edge();
 
-    map<pii, HalfEdge*>::iterator it = linestate.lower_bound(pii(sc.p1.X, sc.p1.Y));
+    sn = next->edge(); sp = prev->edge();
+
+    //If next going down, add it to map
+    if(sc.p2.Y > sn.p2.Y) linestate[pii(sn.p2.X, sn.p2.Y)] = next;
+    //If prev going down, add it to map
+    if(sc.p2.Y > sp.p2.Y) linestate[pii(sp.p2.X, sp.p2.Y)] = prev;
+
+    //Event from right to left
+    if(cur->origin->coord.X == sc.p2.X) {
+      //Left side
+      map<pii, HalfEdge*>::iterator it = linestate.lower_bound(pii(sc.p1.X, sc.p1.Y));
+      if(it != linestate.begin()) {
+        it--;
+        //Up side
+        if(sc.p2.Y == sn.p2.Y) {
+          //Is test edge inside polygon
+          if(it->S->origin->coord.Y > sc.p2.Y) {
+            //If vertice does not exist yet
+            if(vertices.find(pii(it->S->origin->coord.X, sc.p2.Y)) == vertices.end()) {
+              HalfEdge *split = it->S;
+              linestate.erase(it);
+              splitHalfEdgeL(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
+            }
+            //If it does, Half Edge already exists
+            else {
+
+            }
+          }
+        }
+        //Down side raises no problems
+      }
+
+      //Right side
+      it = linestate.lower_bound(pii(sc.p2.X, sc.p2.Y));
+
+      map<pii, HalfEdge*>::iterator itlast = linestate.end();
+      itlast--;
+
+      if(it != itlast && it != linestate.end()) {
+        it++;
+        //Up side
+        if(sc.p2.Y == sp.p2.Y) {
+          //Is test edge inside polygon
+          if(it->S->origin->coord.Y < sc.p2.Y) {
+            //If vertice does not exist yet
+            if(vertices.find(pii(it->S->origin->coord.X, sc.p2.Y)) == vertices.end()) {
+              HalfEdge *split = it->S;
+              linestate.erase(it);
+              splitHalfEdgeR(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
+            }
+            //If it does, check if HalfEdge already exists
+            else {
+
+            }
+          }
+        }
+        //Down side raises no problems
+      }
+    }
+    //Event from left to right
+    else {
+      //Left side
+      map<pii, HalfEdge*>::iterator it = linestate.lower_bound(pii(sp.p2.X, sp.p2.Y));
+      if(it != linestate.begin()) {
+        it--;
+        //Up side raises no problems
+        //Down side
+        if(sc.p2.Y == sp.p1.Y) {
+          //Is test edge inside polygon
+          if(it->S->origin->coord.Y > sc.p2.Y) {
+            //If vertice does not exist yet
+            if(vertices.find(pii(it->S->origin->coord.X, sc.p2.Y)) == vertices.end()) {
+              HalfEdge *split = it->S;
+              linestate.erase(it);
+              splitHalfEdgeR(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
+            }
+            //If it does, Half Edge already exists
+            else {
+
+            }
+          }
+        }
+      }
+      //Right side
+      it = linestate.lower_bound(pii(sc.p2.X, sc.p2.Y));
+
+      map<pii, HalfEdge*>::iterator itlast = linestate.end();
+      itlast--;
+
+      if(it != itlast && it != linestate.end()) {
+        it++;
+        //Up side raises no problems
+        //Down side
+        if(sc.p2.Y == sn.p1.Y) {
+          //Is test edge inside polygon
+          if(it->S->origin->coord.Y < sc.p2.Y) {
+            //If vertice does not exist yet
+            if(vertices.find(pii(it->S->origin->coord.X, sc.p2.Y)) == vertices.end()) {
+              HalfEdge *split = it->S;
+              linestate.erase(it);
+              splitHalfEdgeL(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
+            }
+            //If it does, check if HalfEdge already exists
+            else {
+
+            }
+          }
+        }
+      }
+    }
+
+    /*map<pii, HalfEdge*>::iterator it = linestate.lower_bound(pii(sc.p1.X, sc.p1.Y));
 
     if(it != linestate.begin()) {
       it--;
       if(it->S->origin->coord.Y > sc.p2.Y) {
         if(vertices.find(pii(it->S->origin->coord.X, sc.p2.Y)) == vertices.end()) {
-          HalfEdge *split = it->S;
-          linestate.erase(it);
-          splitHalfEdgeL(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
+          if(cur->origin->coord.X == sc.p2.X) {
+            HalfEdge *split = it->S;
+            linestate.erase(it);
+            splitHalfEdgeL(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
+          }
+          else {
+            HalfEdge *split = it->S;
+            linestate.erase(it);
+            splitHalfEdgeR(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
+          }
         }
       }
     }
@@ -348,10 +625,17 @@ void dcel::sweep_line() {
       it++;
       if(it->S->origin->coord.Y < sc.p2.Y) {
         if(vertices.find(pii(it->S->origin->coord.X, sc.p2.Y)) == vertices.end()) {
-          HalfEdge *split = it->S;
-          linestate.erase(it);
-          splitHalfEdgeR(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
-          //cout << "splitHalfEdgeR bugged." << endl;
+          if(cur->origin->coord.X == sc.p1.X) {
+            HalfEdge *split = it->S;
+            linestate.erase(it);
+            splitHalfEdgeR(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
+            //cout << "splitHalfEdgeR bugged." << endl;
+          }
+          else {
+            HalfEdge *split = it->S;
+            linestate.erase(it);
+            splitHalfEdgeL(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
+          }
         }
       }
     }
@@ -362,6 +646,6 @@ void dcel::sweep_line() {
     sn = next->edge(); sp = prev->edge();
 
     if(sn.p2.Y != sc.p2.Y) linestate[pii(sn.p2.X, sn.p2.Y)] = next;
-    if(sp.p2.Y != sc.p2.Y) linestate[pii(sp.p2.X, sp.p2.Y)] = prev;
+    if(sp.p2.Y != sc.p2.Y) linestate[pii(sp.p2.X, sp.p2.Y)] = prev;*/
   }
 }

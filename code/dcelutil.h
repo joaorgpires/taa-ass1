@@ -89,7 +89,7 @@ private:
   static bool comp(const HalfEdge *a, const HalfEdge *b);
   void splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y);
   void splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y);
-  Face *create_face_from(HalfEdge *e);
+  void create_face_from(HalfEdge *e);
 };
 
 #endif
