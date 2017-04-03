@@ -84,9 +84,11 @@ void dcel::find_faces(Face *face) {
   HalfEdge *first = face->outer;
   HalfEdge *cur = first->next;
 
-  while(cur != first) {
+  int n = 0;
+  while(cur != first && n != 15) {
     find_faces(cur->twin->incident);
     cur = cur->next;
+    n++;
   }
 }
 
@@ -121,7 +123,7 @@ void dcel::print_dcel() {
   int w3 = 13;
   int w4 = 15;
   cout << "Half Edge:   Origin:     Twin:        Incident Face: Next:        Previous:" << endl;
-  for(int i = 0; i < face_index; i++) {
+  for(int i = 0; i < (int)faces.size(); i++) {
     HalfEdge *cur = faces[i]->outer;
     char s[20];
     sprintf(s, "v%d,v%d", cur->origin->index, cur->twin->origin->index);
@@ -201,8 +203,8 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
 
   e1->origin = split->origin;
   split->origin->outer = e1;
-  e1->incident = split->incident;
-  split->incident->outer = e1;
+  //e1->incident = split->incident;
+  //split->incident->outer = e1;
   e1->twin = e3;
   e1->prev = prev;
   prev->next = e1;
@@ -226,8 +228,8 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   split->twin->incident->outer = e3;
   e3->twin = e1;
   e3->prev = e4;
-  e3->next = prev->twin;
-  prev->twin->prev = e3;
+  e3->next = split->twin->next;
+  split->twin->next->prev = e3;
 
   e4->origin = split->twin->origin;
   e4->incident = split->twin->incident;
@@ -237,7 +239,7 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   split->twin->prev->next = e4;
 
   e5->origin = newv;
-  e5->incident = split->incident;
+  //e5->incident = split->incident;
   e5->twin = e6;
   e5->prev = e1;
   e5->next = evnext;
@@ -247,6 +249,9 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   e6->twin = e5;
   e6->prev = event;
 
+  create_face_from(e1);
+
+  /*DEBUG----------
   cout << endl << "------HALF EDGES------" << endl;
   const char sep = ' ';
   int w1 = 13;
@@ -325,7 +330,7 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   sprintf(s, "v%d,v%d", e6->next->origin->index, e6->next->twin->origin->index);
   cout << left << setw(w3) << setfill(sep) << s;
   sprintf(s, "v%d,v%d", e6->prev->origin->index, e6->prev->twin->origin->index);
-  cout << s << endl;
+  cout << s << endl;*/
 }
 
 void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y) {
@@ -342,8 +347,8 @@ void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y) {
 
   Vertex *newv = create_vertex_from(e1, Point(x, y));
   e1->origin = newv;
-  e1->incident = split->incident;
-  split->incident->outer = e1;
+  //e1->incident = split->incident;
+  //split->incident->outer = e1;
   e1->twin = e3;
   e1->prev = e5;
   e1->next = next;
@@ -377,7 +382,7 @@ void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   split->twin->next->prev = e4;
 
   e5->origin = event->origin;
-  e5->incident = split->incident;
+  //e5->incident = split->incident;
   e5->twin = e6;
   e5->prev = evprev;
   evprev->next = e5;
@@ -387,6 +392,9 @@ void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   e6->twin = e5;
   e6->prev = e2;
 
+  create_face_from(e1);
+
+  /*DEBUG-----------
   cout << endl << "------HALF EDGES------" << endl;
   const char sep = ' ';
   int w1 = 13;
@@ -465,7 +473,7 @@ void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   sprintf(s, "v%d,v%d", e6->next->origin->index, e6->next->twin->origin->index);
   cout << left << setw(w3) << setfill(sep) << s;
   sprintf(s, "v%d,v%d", e6->prev->origin->index, e6->prev->twin->origin->index);
-  cout << s << endl;
+  cout << s << endl;*/
 }
 
 void dcel::sweep_line() {
@@ -485,7 +493,8 @@ void dcel::sweep_line() {
     prev = cur->prev;
     Segment sc = cur->edge();
 
-    cout << "Event: " << sc.p1.X << " " << sc.p1.Y << " " << sc.p2.X << " " << sc.p2.Y << endl;
+    //DEBUG----------
+    //cout << "Event: " << sc.p1.X << " " << sc.p1.Y << " " << sc.p2.X << " " << sc.p2.Y << endl;
 
     sn = next->edge(); sp = prev->edge();
 
