@@ -90,6 +90,8 @@ private:
   void splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y);
   void splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y);
   void create_face_from(HalfEdge *e);
+  void middle(HalfEdge *event, HalfEdge *connect);
+  //void middleLR(HalgEdge *event, HalfEdge *connect);
 };
 
 #endif

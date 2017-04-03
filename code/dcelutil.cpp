@@ -476,6 +476,35 @@ void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   cout << s << endl;*/
 }
 
+void dcel::middle(HalfEdge *event, HalfEdge *connect) {
+  HalfEdge *evprev = event->prev;
+  HalfEdge *conext = connect->next;
+
+  HalfEdge *e1 = new HalfEdge();
+  HalfEdge *e2 = new HalfEdge();
+
+  e1->origin = event->origin;
+  e2->origin = connect->twin->origin;
+
+  e1->twin = e2;
+  e2->twin = e1;
+
+  e1->prev = evprev;
+  evprev->next = e1;
+
+  e2->prev = connect;
+  connect->next = e2;
+
+  e1->next = conext;
+  conext->prev = e1;
+
+  e2->next = event;
+  event->prev = e2;
+
+  create_face_from(e1);
+  create_face_from(e2);
+}
+
 void dcel::sweep_line() {
   sort(eventsH.begin(), eventsH.end(), comp); //tested, ordering is ok
 
@@ -494,7 +523,7 @@ void dcel::sweep_line() {
     Segment sc = cur->edge();
 
     //DEBUG----------
-    //cout << "Event: " << sc.p1.X << " " << sc.p1.Y << " " << sc.p2.X << " " << sc.p2.Y << endl;
+    cout << "Event: " << sc.p1.X << " " << sc.p1.Y << " " << sc.p2.X << " " << sc.p2.Y << endl;
 
     sn = next->edge(); sp = prev->edge();
 
@@ -519,10 +548,9 @@ void dcel::sweep_line() {
               linestate.erase(it);
               splitHalfEdgeL(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
             }
-            //If it does, Half Edge already exists
-            else {
-
-            }
+          }
+          else if(it->S->origin->coord.Y == sc.p2.Y){
+            //Pass
           }
         }
         //Down side raises no problems
@@ -546,10 +574,10 @@ void dcel::sweep_line() {
               linestate.erase(it);
               splitHalfEdgeR(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
             }
-            //If it does, check if HalfEdge already exists
-            else {
-
-            }
+          }
+          //If it is equal, connect points
+          else if(it->S->origin->coord.Y == sc.p2.Y) {
+            middle(cur, it->S->prev);
           }
         }
         //Down side raises no problems
@@ -572,10 +600,10 @@ void dcel::sweep_line() {
               linestate.erase(it);
               splitHalfEdgeR(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
             }
-            //If it does, Half Edge already exists
-            else {
-
-            }
+          }
+          //If it is equal, connect points
+          else if(it->S->origin->coord.Y == sc.p2.Y) {
+            middle(cur, it->S->prev);
           }
         }
       }
@@ -598,10 +626,9 @@ void dcel::sweep_line() {
               linestate.erase(it);
               splitHalfEdgeL(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
             }
-            //If it does, check if HalfEdge already exists
-            else {
-
-            }
+          }
+          else if(it->S->origin->coord.Y == sc.p2.Y) {
+            //Pass
           }
         }
       }
