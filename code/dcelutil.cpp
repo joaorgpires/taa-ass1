@@ -527,12 +527,10 @@ void dcel::sweep_line() {
 
     sn = next->edge(); sp = prev->edge();
 
-    if(eventsH[i-1]->origin->coord.Y != cur->origin->coord.Y) {
-      //If next going down, add it to map
-      if(sc.p2.Y > sn.p2.Y) linestate[pii(sn.p2.X, sn.p2.Y)] = next;
-      //If prev going down, add it to map
-      if(sc.p2.Y > sp.p2.Y) linestate[pii(sp.p2.X, sp.p2.Y)] = prev;
-    }
+    //If next going down, add it to map
+    if(sc.p2.Y > sn.p2.Y) linestate[pii(sn.p2.X, sn.p2.Y)] = next;
+    //If prev going down, add it to map
+    if(sc.p2.Y > sp.p2.Y) linestate[pii(sp.p2.X, sp.p2.Y)] = prev;
 
     if(i < (int)eventsH.size() - 1 && cur->origin->coord.Y == eventsH[i + 1]->origin->coord.Y) {
       Segment sne = eventsH[i + 1]->next->edge();
