@@ -180,6 +180,7 @@ void dcel::create_face_from(HalfEdge *e) {
 
   HalfEdge *cur = e->next;
 
+
   while(cur != e) {
     cur->incident = f;
     cur = cur->next;
@@ -246,7 +247,7 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   e6->twin = e5;
   e6->prev = event;
 
-  cout << "-----" << endl;
+  cout << endl << "------HALF EDGES------" << endl;
   const char sep = ' ';
   int w1 = 13;
   int w2 = 12;
@@ -386,8 +387,7 @@ void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   e6->twin = e5;
   e6->prev = e2;
 
-  /*
-  cout << "-----" << endl;
+  cout << endl << "------HALF EDGES------" << endl;
   const char sep = ' ';
   int w1 = 13;
   int w2 = 12;
@@ -465,7 +465,7 @@ void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   sprintf(s, "v%d,v%d", e6->next->origin->index, e6->next->twin->origin->index);
   cout << left << setw(w3) << setfill(sep) << s;
   sprintf(s, "v%d,v%d", e6->prev->origin->index, e6->prev->twin->origin->index);
-  cout << s << endl;*/
+  cout << s << endl;
 }
 
 void dcel::sweep_line() {
@@ -484,6 +484,8 @@ void dcel::sweep_line() {
     next = cur->next;
     prev = cur->prev;
     Segment sc = cur->edge();
+
+    cout << "Event: " << sc.p1.X << " " << sc.p1.Y << " " << sc.p2.X << " " << sc.p2.Y << endl;
 
     sn = next->edge(); sp = prev->edge();
 
@@ -569,7 +571,7 @@ void dcel::sweep_line() {
         }
       }
       //Right side
-      it = linestate.lower_bound(pii(sc.p2.X, sc.p2.Y));
+      it = linestate.lower_bound(pii(sn.p2.X, sn.p2.Y));
 
       map<pii, HalfEdge*>::iterator itlast = linestate.end();
       itlast--;
@@ -595,57 +597,7 @@ void dcel::sweep_line() {
         }
       }
     }
-
-    /*map<pii, HalfEdge*>::iterator it = linestate.lower_bound(pii(sc.p1.X, sc.p1.Y));
-
-    if(it != linestate.begin()) {
-      it--;
-      if(it->S->origin->coord.Y > sc.p2.Y) {
-        if(vertices.find(pii(it->S->origin->coord.X, sc.p2.Y)) == vertices.end()) {
-          if(cur->origin->coord.X == sc.p2.X) {
-            HalfEdge *split = it->S;
-            linestate.erase(it);
-            splitHalfEdgeL(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
-          }
-          else {
-            HalfEdge *split = it->S;
-            linestate.erase(it);
-            splitHalfEdgeR(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
-          }
-        }
-      }
-    }
-
-    it = linestate.lower_bound(pii(sc.p2.X, sc.p2.Y));
-
-    map<pii, HalfEdge*>::iterator itlast = linestate.end();
-    itlast--;
-
-    if(it != itlast && it != linestate.end()) {
-      it++;
-      if(it->S->origin->coord.Y < sc.p2.Y) {
-        if(vertices.find(pii(it->S->origin->coord.X, sc.p2.Y)) == vertices.end()) {
-          if(cur->origin->coord.X == sc.p1.X) {
-            HalfEdge *split = it->S;
-            linestate.erase(it);
-            splitHalfEdgeR(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
-            //cout << "splitHalfEdgeR bugged." << endl;
-          }
-          else {
-            HalfEdge *split = it->S;
-            linestate.erase(it);
-            splitHalfEdgeL(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
-          }
-        }
-      }
-    }
-
-    linestate.erase(pii(sc.p1.X, sc.p1.Y));
-    linestate.erase(pii(sc.p2.X, sc.p2.Y));
-
-    sn = next->edge(); sp = prev->edge();
-
-    if(sn.p2.Y != sc.p2.Y) linestate[pii(sn.p2.X, sn.p2.Y)] = next;
-    if(sp.p2.Y != sc.p2.Y) linestate[pii(sp.p2.X, sp.p2.Y)] = prev;*/
+    if(sn.p2.Y == cur->origin->coord.Y) linestate.erase(pii(sn.p2.X, sn.p2.Y));
+    if(sp.p2.Y == cur->origin->coord.Y) linestate.erase(pii(sp.p2.X, sp.p2.Y));
   }
 }
