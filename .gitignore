@@ -1,3 +1,5 @@
 *.out
 helper.cpp
 *~
+report/.texpadtmp/
+*.pdf

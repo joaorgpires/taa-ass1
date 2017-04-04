@@ -1,0 +1,106 @@
+%----------------------------------------------------------------------------------------
+%	CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[12pt,a4paper,oneside]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[a4paper,left=2cm,right=2cm,top=2.5cm,bottom=2.5cm]{geometry}
+\setcounter{section}{-1}
+
+%----------------------------------------------------------------------------------------
+%	INFORMATION
+%----------------------------------------------------------------------------------------
+
+\title{Tópicos Avançados em Algoritmos (TAA) - Practical Assignment 1}
+
+\author{João Rebelo Pires\footnote{João Rebelo Pires - 201200384} and José Miguel Oliveira\footnote{José Miguel Oliveira - 201304192}}
+
+\date{DCC - FCUP, April 2017}
+
+\begin{document}
+
+\maketitle
+
+%----------------------------------------------------------------------------------------
+%	SECTION 0
+%----------------------------------------------------------------------------------------
+
+\section{How To}\label{sec:for_dummies}
+
+In this section, we simply want to explain how to compile and execute our implementation.
+
+\subsection{Input Description}\label{subsec:input_descrip}
+
+The first line of input contains a single integer, an option. If this option is $0$, we are looking for the horizontal partition. Alternatively, the option may be $1$, indicating that we are looking for the grid partition.
+
+The second line of input is an integer, $n\_vertices$, describing the number of vertices the orthogonal polygon has. Then $n\_vertices$ lines follow, the coordinates of the vertices of the polygon, given in counterclockwise order. The coordinates are integer.
+
+The next line of input is an integer, $n\_holes$, describing the number of holes the polygon has. The following lines describe each hole, ina  similar way as the polygon is described.
+
+\subsection{Output Description}\label{subsec:output_descrip}
+
+The output is well represented. It consists on three groups of information.
+
+\begin{enumerate}
+	\item The description of each vertex of the DCEL;
+	\item The description of each face of the DCEL;
+	\item The description of each half edge of the DCEL.
+\end{enumerate}
+
+The information each element of the DCEL provides is discussed in section . %TODO \ref para a sec com isto
+
+\subsection{Compilation}\label{subsec:compile}
+
+The following command line compiles the code:
+
+\textit{In MacOS X:}
+
+\texttt{clang++ -Wall main.cpp code/dcelutil.cpp}\\
+
+\textit{In Linux:}
+
+\texttt{c++ -Wall main.cpp code/dcelutil.cpp}
+
+\subsection{Execution}
+
+The compiler generates an executable named \textbf{a.out}. To execute it, simply execute the following command line:
+
+\texttt{./a.out}.\\
+
+If you have an input file \textbf{test.in}, you should execute the following command line instead:
+
+\texttt{./a.out < test.in}.
+
+%----------------------------------------------------------------------------------------
+%	SECTION 1
+%----------------------------------------------------------------------------------------
+
+
+
+
+
+
+%----------------------------------------------------------------------------------------
+%	SECTION 2
+%----------------------------------------------------------------------------------------
+
+
+
+
+
+%----------------------------------------------------------------------------------------
+%	SECTION 3
+%----------------------------------------------------------------------------------------
+
+
+
+
+
+
+\end{document}
