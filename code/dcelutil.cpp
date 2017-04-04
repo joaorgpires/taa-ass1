@@ -51,6 +51,9 @@ void dcel::init_hole(Polygon hole) {
     }
 
     cur = cur->next;
+
+    halfedges[pii(next->origin->index, next->twin->origin->index)] = next;
+    halfedges[pii(next->twin->origin->index, next->origin->index)] = next->twin;
   }
 
   first->twin->next->next = first->prev->prev->twin;
@@ -98,6 +101,9 @@ void dcel::init_poly(Polygon p) {
     }
 
     cur = cur->next;
+
+    halfedges[pii(next->origin->index, next->twin->origin->index)] = next;
+    halfedges[pii(next->twin->origin->index, next->origin->index)] = next->twin;
   }
 
   first->twin->next->next = first->prev->prev->twin;
@@ -231,7 +237,17 @@ void dcel::create_face_from(HalfEdge *e) {
   }
 }
 
-void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
+void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y, bool vertical, bool debug) {
+  if(vertical && !debug) {
+    Point P(x, y);
+    P = rotateCW90(P);
+    interest_points.push_back(edge_point(pii(split->origin->index, split->twin->origin->index), pii(P.X, P.Y)));
+    linestate[pii(split->twin->origin->coord.X, split->twin->origin->coord.Y)] = split;
+    return;
+  }
+
+  halfedges.erase(pii(split->origin->index, split->twin->origin->index));
+
   HalfEdge *prev = split->prev;
   HalfEdge *next = split->next;
   HalfEdge *evnext = event->next;
@@ -294,6 +310,13 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
 
   if(e1->edge().p2.Y > e2->edge().p2.Y) linestate[pii(split->edge().p2.X, split->edge().p2.Y)] = e2;
   else linestate[pii(split->edge().p2.X, split->edge().p2.Y)] = e1;
+
+  halfedges[pii(e1->origin->index, e1->twin->origin->index)] = e1;
+  halfedges[pii(e2->origin->index, e2->twin->origin->index)] = e2;
+  halfedges[pii(e3->origin->index, e3->twin->origin->index)] = e3;
+  halfedges[pii(e4->origin->index, e4->twin->origin->index)] = e4;
+  halfedges[pii(e5->origin->index, e5->twin->origin->index)] = e5;
+  halfedges[pii(e6->origin->index, e6->twin->origin->index)] = e6;
 
   /*DEBUG----------
   cout << endl << "------HALF EDGES------" << endl;
@@ -377,7 +400,17 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   cout << s << endl;*/
 }
 
-void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y) {
+void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y, bool vertical, bool debug) {
+  if(vertical && !debug) {
+    Point P(x, y);
+    P = rotateCW90(P);
+    interest_points.push_back(edge_point(pii(split->origin->index, split->twin->origin->index), pii(P.X, P.Y)));
+    linestate[pii(split->twin->origin->coord.X, split->twin->origin->coord.Y)] = split;
+    return;
+  }
+
+  halfedges.erase(pii(split->origin->index, split->twin->origin->index));
+
   HalfEdge *prev = split->prev;
   HalfEdge *next = split->next;
   HalfEdge *evprev = event->prev;
@@ -438,6 +471,13 @@ void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y) {
   create_face_from(e2);
   if(e1->edge().p2.Y > e2->edge().p2.Y) linestate[pii(split->edge().p2.X, split->edge().p2.Y)] = e2;
   else linestate[pii(split->edge().p2.X, split->edge().p2.Y)] = e1;
+
+  halfedges[pii(e1->origin->index, e1->twin->origin->index)] = e1;
+  halfedges[pii(e2->origin->index, e2->twin->origin->index)] = e2;
+  halfedges[pii(e3->origin->index, e3->twin->origin->index)] = e3;
+  halfedges[pii(e4->origin->index, e4->twin->origin->index)] = e4;
+  halfedges[pii(e5->origin->index, e5->twin->origin->index)] = e5;
+  halfedges[pii(e6->origin->index, e6->twin->origin->index)] = e6;
 
   /*DEBUG-----------
   cout << endl << "------HALF EDGES------" << endl;
@@ -548,9 +588,12 @@ void dcel::middle(HalfEdge *event, HalfEdge *connect) {
 
   create_face_from(e1);
   create_face_from(e2);
+
+  halfedges[pii(e1->origin->index, e1->twin->origin->index)] = e1;
+  halfedges[pii(e2->origin->index, e2->twin->origin->index)] = e2;
 }
 
-void dcel::sweep_line(bool vertical) {
+void dcel::sweep_line(bool vertical, bool debug) {
   sort(eventsH.begin(), eventsH.end(), comp); //tested, ordering is ok
 
   HalfEdge *cur = eventsH[0];
@@ -600,7 +643,7 @@ void dcel::sweep_line(bool vertical) {
             if(vertices.find(pii(it->S->origin->coord.X, sc.p2.Y)) == vertices.end()) {
               HalfEdge *split = it->S;
               linestate.erase(it);
-              splitHalfEdgeL(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
+              splitHalfEdgeL(split, eventsH[i], split->origin->coord.X, sc.p2.Y, vertical, debug);
             }
           }
           else if(it->S->origin->coord.Y == sc.p2.Y){
@@ -626,7 +669,7 @@ void dcel::sweep_line(bool vertical) {
             if(vertices.find(pii(it->S->origin->coord.X, sc.p2.Y)) == vertices.end()) {
               HalfEdge *split = it->S;
               linestate.erase(it);
-              splitHalfEdgeR(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
+              splitHalfEdgeR(split, eventsH[i], split->origin->coord.X, sc.p2.Y, vertical, debug);
             }
           }
           //If it is equal, connect points
@@ -652,7 +695,7 @@ void dcel::sweep_line(bool vertical) {
             if(vertices.find(pii(it->S->origin->coord.X, sc.p2.Y)) == vertices.end()) {
               HalfEdge *split = it->S;
               linestate.erase(it);
-              splitHalfEdgeR(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
+              splitHalfEdgeR(split, eventsH[i], split->origin->coord.X, sc.p2.Y, vertical, debug);
             }
           }
           //If it is equal, connect points
@@ -678,7 +721,7 @@ void dcel::sweep_line(bool vertical) {
             if(vertices.find(pii(it->S->origin->coord.X, sc.p2.Y)) == vertices.end()) {
               HalfEdge *split = it->S;
               linestate.erase(it);
-              splitHalfEdgeL(split, eventsH[i], split->origin->coord.X, sc.p2.Y);
+              splitHalfEdgeL(split, eventsH[i], split->origin->coord.X, sc.p2.Y, vertical, debug);
             }
           }
           else if(it->S->origin->coord.Y == sc.p2.Y) {
@@ -717,4 +760,21 @@ void dcel::rotate_partition() {
   for(map<pii, Vertex*>::iterator it = vertices.begin(); it != vertices.end(); ++it) {
     it->S->coord = rotateCW90(it->S->coord);
   }
+}
+
+vector<edge_point> dcel::give_interest_points(bool debug) {
+  sort(interest_points.begin(), interest_points.end());
+
+  if(debug) {
+    cout << "Interest points from vertical partition:" << endl;
+    for(int i = 0; i < (int)interest_points.size(); i++) {
+      cout << "Edge: " << interest_points[i].F.F << " " << interest_points[i].F.S << ". Point: " << interest_points[i].S.F << " " << interest_points[i].S.S << endl;
+    }
+  }
+
+  return interest_points;
+}
+
+void dcel::get_interest_points(vector<edge_point> vert) {
+  interest_points = vert;
 }

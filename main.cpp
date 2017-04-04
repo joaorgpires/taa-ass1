@@ -39,14 +39,17 @@ int main() {
     if(option == 1) vertical->vertical_hole(hole);
   }
 
-  partition->sweep_line(false);
-  partition->print_dcel(false);
-
-  if(option == 1) {
-    vertical->sweep_line(true);
-    //DEBUG-----------
-    //vertical->print_dcel(true);
+  partition->sweep_line();
+  if(option == 0) {
+    partition->print_dcel();
+    return 0;
   }
+
+  vertical->sweep_line(true);
+  vector<edge_point> interest_points = vertical->give_interest_points();
+  partition->get_interest_points(interest_points);
+  //DEBUG-----------
+  //vertical->print_dcel(true);
 
   return 0;
 }
