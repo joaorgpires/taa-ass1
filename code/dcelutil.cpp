@@ -780,3 +780,112 @@ vector<edge_point> dcel::give_interest_points(bool debug) {
 void dcel::get_interest_points(vector<edge_point> vert) {
   interest_points = vert;
 }
+
+void dcel::handle_vertical() {
+  if((int)interest_points.size() == 0) return;
+
+  vector<int> divisions;
+
+  divisions.push_back(0);
+
+  for(int i = 1; i < (int)interest_points.size(); i++) {
+    if(interest_points[i].F.F != interest_points[i - 1].F.F || interest_points[i].F.S != interest_points[i - 1].F.S) {
+      divisions.push_back(i);
+    }
+  }
+
+  if((int)divisions.size() == 1) {
+    split_edge_from_points(interest_points);
+    return;
+  }
+
+  vector<edge_point>::iterator beg;
+  vector<edge_point>::iterator fin;
+
+  for(int i = 1; i < (int)divisions.size(); i++) {
+    beg = interest_points.begin() + divisions[i - 1];
+    fin = interest_points.begin() + divisions[i];
+    vector<edge_point> one_edge(beg, fin);
+    split_edge_from_points(one_edge);
+  }
+
+  beg = interest_points.begin() + divisions[(int)divisions.size() - 1];
+  fin = interest_points.end();
+  vector<edge_point> one_edge(beg, fin);
+  split_edge_from_points(one_edge);
+}
+
+bool dcel::cmp2(edge_point a, edge_point b) {
+  return a.S.F > b.S.F;
+}
+
+void dcel::split_edge_from_points(vector<edge_point> one_edge) {
+  HalfEdge *split = halfedges[pii(one_edge[0].F.F, one_edge[0].F.S)];
+  HalfEdge *twin = split->twin;
+
+  if(split->origin->coord.X == split->edge().p2.X) sort(one_edge.begin(), one_edge.end(), cmp2);
+
+  int npoints = one_edge.size();
+  HalfEdge *nedges[npoints + 1];
+
+  nedges[0] = new HalfEdge();
+
+  nedges[0]->origin = split->origin;
+  nedges[0]->origin->outer = nedges[0];
+  nedges[0]->incident = split->incident;
+  nedges[0]->incident->outer = nedges[0];
+
+  nedges[0]->prev = split->prev;
+
+  for(int i = 0; i < npoints; i++) cout << one_edge[i].S.F << endl;
+
+  for(int i = 1; i < npoints + 1; i++) {
+    nedges[i] = new HalfEdge();
+
+    nedges[i - 1]->next = nedges[i];
+    nedges[i]->prev = nedges[i - 1];
+    Point p = Point(one_edge[i - 1].S.F, one_edge[i - 1].S.S);
+    nedges[i]->origin = create_vertex_from(nedges[i], p);
+    nedges[i]->incident = nedges[0]->incident;
+  }
+
+  nedges[npoints]->next = split->next;
+  split->next->origin->outer = split->next;
+
+  for(int i = 0; i < npoints + 1; i++) {
+    HalfEdge *next = new HalfEdge();
+
+    next->origin = nedges[i]->next->origin;
+    next->twin = nedges[i];
+    nedges[i]->twin = next;
+    next->incident = twin->incident;
+    next->incident->outer = next;
+
+    if(i == 0) {
+      next->next = twin->next;
+    }
+    else {
+      next->next = nedges[i - 1]->twin;
+    }
+  }
+
+  for(int i = 0; i < npoints + 1; i++) {
+    if(i == npoints) {
+      nedges[i]->twin->prev = twin->prev;
+    }
+    else {
+      nedges[i]->twin->prev = nedges[i + 1]->twin;
+    }
+  }
+
+  nedges[0]->prev->twin->prev = nedges[0]->twin;
+  nedges[npoints]->next->twin->next = nedges[npoints]->twin;
+
+  nedges[0]->prev->next = nedges[0];
+  nedges[npoints]->next->prev = nedges[npoints]->twin;
+
+  for(int i = 0; i < npoints + 1; i++) {
+    halfedges[pii(nedges[i]->origin->index, nedges[i]->twin->origin->index)] = nedges[i];
+    halfedges[pii(nedges[i]->twin->origin->index, nedges[i]->origin->index)] = nedges[i]->twin;
+  }
+}

@@ -48,8 +48,10 @@ int main() {
   vertical->sweep_line(true);
   vector<edge_point> interest_points = vertical->give_interest_points();
   partition->get_interest_points(interest_points);
+  partition->handle_vertical();
   //DEBUG-----------
   //vertical->print_dcel(true);
+  partition->print_dcel();
 
   return 0;
 }

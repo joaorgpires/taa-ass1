@@ -27,6 +27,7 @@ public:
   void vertical_hole(Polygon hole);
   vector<edge_point> give_interest_points(bool debug = false);
   void get_interest_points(vector<edge_point> vert);
+  void handle_vertical();
 
 private:
   struct Vertex;
@@ -95,6 +96,7 @@ private:
   void find_faces(Face *face);
   void add_event(HalfEdge *edge);
   static bool comp(const HalfEdge *a, const HalfEdge *b);
+  static bool cmp2(edge_point a, edge_point b);
   void splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y, bool vertical, bool debug);
   void splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y, bool vertical, bool debug);
   void create_face_from(HalfEdge *e);
@@ -103,6 +105,7 @@ private:
   Point rotateCCW90(Point p) { return Point(-p.Y, p.X); }
   Point rotateCW90(Point p) { return Point(p.Y, -p.X); }
   void rotate_partition();
+  void split_edge_from_points(vector<edge_point> one_edge);
 };
 
 #endif
