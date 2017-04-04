@@ -5,8 +5,6 @@
 
 using namespace std;
 
-//Idea for holes: guardar os indices das outer faces dos holes, depois fica facil imprimir (tenho uma halfedge a representar aquilo e depois posso usar as twins)
-
 dcel::dcel() {
   face_index = 0;
   vertex_index = 0;
@@ -837,7 +835,7 @@ void dcel::split_edge_from_points(vector<edge_point> one_edge) {
 
   nedges[0]->prev = split->prev;
 
-  for(int i = 0; i < npoints; i++) cout << one_edge[i].S.F << endl;
+  //for(int i = 0; i < npoints; i++) cout << one_edge[i].S.F << endl;
 
   for(int i = 1; i < npoints + 1; i++) {
     nedges[i] = new HalfEdge();

@@ -5,6 +5,7 @@
 \documentclass[12pt,a4paper,oneside]{article}
 
 \usepackage[utf8]{inputenc}
+\usepackage[colorlinks=true, citecolor=blue, linkcolor=black]{hyperref}
 \usepackage{graphicx}
 \usepackage{natbib}
 \usepackage{amsmath}
@@ -54,7 +55,7 @@ The output is well represented. It consists on three groups of information.
 	\item The description of each half edge of the DCEL.
 \end{enumerate}
 
-The information each element of the DCEL provides is discussed in section . %TODO \ref para a sec com isto
+The information each element of the DCEL provides is discussed in Section \ref{sec:dcel}.
 
 \subsection{Compilation}\label{subsec:compile}
 
@@ -81,18 +82,17 @@ If you have an input file \textbf{test.in}, you should execute the following com
 %----------------------------------------------------------------------------------------
 %	SECTION 1
 %----------------------------------------------------------------------------------------
-\section{Introduction}
+\section{Introduction}\label{sec:intro}
 For this assignment we had the task of partitioning any orthogonal polygon with or without holes, then compute the visibility and finally study experimentally the minimum guard problem. 
 
-We managed to complete the first of three parts by doing the horizontal and grid partition of the polygon.
-We used a sweeping algorithm to accomplish the horizontal and vertical partitions. 
-When doing the vertical partition we would rotate the polygon 90 degrees CCW and execute the same sweeping algorithm as for the horizontal partition.
+Our algorithm gives the complete horizontal partition. As for the grid partition, we did not manage to complete it, but what is left to implement of our strategy is discussed in Section \ref{sec:grid}.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 2
 %----------------------------------------------------------------------------------------
-\section{DCEL Structure}
-To represent the polygon with and without the partitions we are using a doubly connected edge list (DCEL).\\
+\section{The Doubly Connected Edge List Structure}\label{sec:dcel}
+To represent the polygon with and without the partitions we use a Doubly Connected Edge List (DCEL), as it provides important operations over the representation to be time efficient, as it is discussed by Marc van Kreveld\footnote{\textit{Computational Geometry -
+Lecture 2b: Subdivision representation and map overlay}, \url{http://www.cs.uu.nl/docs/vakken/ga/slides2b.pdf}}.\\
 This structure allows us to easily build and traverse the polygon, as it is built using the half edges of the polygon and each half edge has the following attributes:
 
 \begin{enumerate}  
@@ -105,7 +105,7 @@ This structure allows us to easily build and traverse the polygon, as it is buil
 
 \begin{figure}[h!]
   \centering \includegraphics[scale=0.5]{dcel.png}
-  \caption{DCEL}
+  \caption{Visual representation of a DCEL.}
   \label{fig:Dcel}
 \end{figure}
 
@@ -118,43 +118,79 @@ Using these attributes we can easily print out the polygon and its partitions us
 %----------------------------------------------------------------------------------------
 %	SECTION 3
 %----------------------------------------------------------------------------------------
-\section{Horizontal Partition}
-To accomplish the horizontal partition, we used a sweeping algorithm.\\ 
-A line would cross the polygon from the bottom up, find the intersections between these events (horizontal edges) and the walls of the polygon on both sides and then extend those events, splitting the polygon.
-Intersections could occur between an inside vertex and a vertical polygon wall or between two inside vertexes.\\
-Let's look at an example:
+\section{Horizontal Partition}\label{sec:hor}
+In order to obtain the horizontal partition, our algorithm uses a sweep line premise.\\ 
+In order to obtain this, we first determine a list of events, as described by Prof. Ana Paula Tomás\footnote{\url{http://www.dcc.fc.up.pt/Pubs/TR04/dcc-2004-03.ps.gz}}, which are horizontal half-edges with its incident face being a face inside the polygon. \\
+Let us look at an example:
 
 \begin{figure}[h!]
   \centering \includegraphics[scale=0.5]{horPartition.png}
   \caption{Horizontal Partition}
-  \label{fig:Horizontal Partition}
+  \label{fig:hor}
 \end{figure}
 
 % http://www.yzuda.org/download/_CornerStitchingStrips/complex-02.png
 
-The figure above, shows us how the horizontal partition of an orthogonal polygon. \\
-The black horizontal line is the sweep line, that goes from event to event looking for possible edge extensions. Each event is a horizontal half edge. \\
+The figure above, shows us how the horizontal partition of an orthogonal polygon.
+
+The black horizontal line is the sweep line, that goes from event to event looking for possible edge extensions. Each event is a horizontal half-edge, as described before.
+
 We can see the different types of intersections that occur, which we mentioned previously. The intersection between two inside vertexes, as we can see at the bottom of rectangle 6, and the intersection between an inside vertex and the vertical polygon wall that can be seen at the top of the rectangle numbered 9.
 
+\subsection{Description of Data Structures Used and Others}\label{subsec:data}
+
+First of all, let us notice that since this is a geometric problem, a lot of geometric primitives are useful. The file \texttt{geoutil.h} includes a series of such primitives that we considered of relevance. The file \texttt{dcelutil.h} also includes the functions \texttt{rotateCCW90} and \texttt{rotateCW90}, which are useful in Section \ref{sec:grid}, that simply rotate a given point $90^{\circ}$ in counterclockwise and clockwise directions, respectively.
+
+The files \texttt{dcelutil.h} and \texttt{dcelutil.cpp} put together the implementation of the major functions of our implementation. Let us take a couple for illustration:
+
+\begin{itemize}
+	\item \texttt{init\_poly}, which given the points of a polygon in counterclockwise direction constructs the DCEL that represents such polygon;
+	\item \texttt{print\_dcel}, that prints the contents of the DCEL;
+	\item \texttt{sweep\_line}, that performs an $n$ $log\left( n \right)$ horizontal sweep through the polygon;
+	\item \texttt{init\_hole}, which adds a hole to the DCEL representation given the points in clockwise direction.
+\end{itemize}
+
+These functions use within themselves functions like \texttt{splitHalfEdgeL}, that given an event, if by extending it we intersect a wall and this segment lyes completely inside the polygon, divides that wall in two, creating also two different faces induced by this division. It is observable that this division not always induces two different faces (because of the holes), but since given a half-edge its next component lyes on the same face as such half-edge, \texttt{create\_face\_from} assures that they are given the same face.
+
+This function, \texttt{splitHalfEdgeL}, can be used in two different situations:
+
+\begin{enumerate}
+	\item If the event is from right to left, the wall of the polygon is on its left, and on the left of such event there is a piece that goes \textit{upwards} in our polygon;
+	\item If the event is from left to right, the wall of the polygon is on its right, and on the right of such event there is a piece that goes \textit{downwards} in our polygon.
+\end{enumerate}
+
+\texttt{splitHalfEdgeR} can be used for the other two cases that we can get.
+
+\subsection{\texttt{map} Data Structure in \texttt{C++} and the State of the Sweep Line}
+
+For representing the state of the sweep line we used a \texttt{map} in \texttt{C++}, since they are implemented as a red-black trees, which provide searching, removing and inserting operations in $log(n)$, giving a complexity for the sweep line algorithm of $n$ $log(n)$, where $n$ is the number of edges.
+
+\texttt{set} is another data structure in \texttt{C++} implemented using red-black trees.
+
+\subsection{Bulletproofness of our Implementation}\label{subsec:bullet}
+
+One question that rises is why is not the grid partition complete, as well as the second and third questions.
+
+In this subsection we discuss why it took us so long to build the horizontal partition.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 4
 %----------------------------------------------------------------------------------------
-\section{Grid Partition}
+\section{Grid Partition}\label{sec:grid}
 For the grid partition we need both the horizontal and vertical partitions in place.\\
 For the vertical partition we used a very similar idea to the horizontal one, with some slight differences.\\
 We would "rotate" the polygon 90 degrees, and execute the horizontal partition. This would work because when the polygon is rotated, the vertical edges become horizontal and vice-versa, so if we were to execute the algorithm for the horizontal partition on the rotated polygon, and then rotate it back to the original position, the partition would become vertical.
 
 \begin{figure}[h!]
   \centering \includegraphics[scale=0.5]{rotatedPoly.png}
-  \caption{Polygon Rotation}
-  \label{fig:Dcel}
+  \caption{Polygon Rotation Example.}
+  \label{fig:rot}
 \end{figure}
 
 \begin{figure}[h!]
   \centering \includegraphics[scale=0.5]{gridPartition.png}
-  \caption{Grid partition}
-  \label{fig:Dcel}
+  \caption{Grid Partition Representation.}
+  \label{fig:grid}
 \end{figure}
 
 All that is left now to complete our grid partition, is to join both the horizontal and vertical partitions. We do that by finding the points of interest in the vertical partition. These points will be the intersections of both partitions.
