@@ -888,4 +888,7 @@ void dcel::split_edge_from_points(vector<edge_point> one_edge) {
     halfedges[pii(nedges[i]->origin->index, nedges[i]->twin->origin->index)] = nedges[i];
     halfedges[pii(nedges[i]->twin->origin->index, nedges[i]->origin->index)] = nedges[i]->twin;
   }
+
+  halfedges.erase(pii(split->origin->index, twin->origin->index));
+  halfedges.erase(pii(twin->origin->index, split->origin->index));
 }
