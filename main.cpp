@@ -16,9 +16,37 @@ int main() {
   }
 
   dcel *partition = new dcel();
+  dcel *vertical = new dcel();
   partition->init_poly(P);
-  partition->sweep_line();
-  partition->print_dcel();
+
+  if(option == 1) {
+    vertical->vertical_init(P);
+  }
+
+  int n_holes; cin >> n_holes;
+
+  for(int n = 0; n < n_holes; n++) {
+    Polygon hole;
+    int n_vert; cin >> n_vert;
+
+    for(int i = 0; i < n_vert; i++) {
+      lld x, y; cin >> x >> y;
+      Point p = Point(x, y);
+      hole.push_back(p);
+    }
+
+    partition->init_hole(hole);
+    if(option == 1) vertical->vertical_hole(hole);
+  }
+
+  partition->sweep_line(false);
+  partition->print_dcel(false);
+
+  if(option == 1) {
+    vertical->sweep_line(true);
+    //DEBUG-----------
+    //vertical->print_dcel(true);
+  }
 
   return 0;
 }

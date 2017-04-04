@@ -14,6 +14,50 @@ dcel::dcel() {
   in_face = NULL;
 }
 
+void dcel::init_hole(Polygon hole) {
+  HalfEdge *first = new HalfEdge(), *cur;
+  Face *hole_face = new Face();
+  hole_face->index = face_index++;
+  first->origin = create_vertex_from(first, hole[0]);
+
+  cur = first;
+  for(int i = 1; i < (int)hole.size(); i++) {
+    HalfEdge *next = new HalfEdge();
+
+    cur->next = next;
+    next->prev = cur;
+    cur->incident = in_face;
+    next->origin = create_vertex_from(next, hole[i]);
+    add_event(cur);
+    cur = next;
+  }
+
+  cur->next = first;
+  first->prev = cur;
+  cur->incident = in_face;
+  add_event(cur);
+
+  for(int i = 0; i < (int)hole.size(); i++) {
+    HalfEdge *next = new HalfEdge();
+
+    next->origin = cur->next->origin;
+    next->twin = cur;
+    cur->twin = next;
+    next->incident = hole_face;
+
+    if(i != 0) {
+      next->next = cur->prev->twin;
+      cur->prev->twin->prev = next;
+    }
+
+    cur = cur->next;
+  }
+
+  first->twin->next->next = first->prev->prev->twin;
+  first->twin->next->next->prev = first->twin->next;
+  hole_face->outer = first->twin;
+}
+
 void dcel::init_poly(Polygon p) {
   HalfEdge *first = new HalfEdge(), *cur;
   out_face = new Face();
@@ -90,7 +134,8 @@ void dcel::find_faces(Face *face) {
   }
 }
 
-void dcel::print_dcel() {
+void dcel::print_dcel(bool vertical) {
+  if(vertical) rotate_partition();
   find_faces(out_face);
 
   cout << "------VERTICES------" << endl;
@@ -505,7 +550,7 @@ void dcel::middle(HalfEdge *event, HalfEdge *connect) {
   create_face_from(e2);
 }
 
-void dcel::sweep_line() {
+void dcel::sweep_line(bool vertical) {
   sort(eventsH.begin(), eventsH.end(), comp); //tested, ordering is ok
 
   HalfEdge *cur = eventsH[0];
@@ -644,5 +689,32 @@ void dcel::sweep_line() {
     }
     if(sn.p2.Y == cur->origin->coord.Y) linestate.erase(pii(sn.p2.X, sn.p2.Y));
     if(sp.p2.Y == cur->origin->coord.Y) linestate.erase(pii(sp.p2.X, sp.p2.Y));
+  }
+}
+
+void dcel::vertical_init(Polygon prev) {
+  Polygon p = rotate_poly(prev);
+  init_poly(p);
+}
+
+void dcel::vertical_hole(Polygon hole) {
+  Polygon p = rotate_poly(hole);
+  init_hole(p);
+}
+
+Polygon dcel::rotate_poly(Polygon prev) {
+  Polygon p;
+
+  for(int i = 0; i < (int)prev.size(); i++) {
+    Point newp = rotateCCW90(prev[i]);
+    p.push_back(newp);
+  }
+
+  return p;
+}
+
+void dcel::rotate_partition() {
+  for(map<pii, Vertex*>::iterator it = vertices.begin(); it != vertices.end(); ++it) {
+    it->S->coord = rotateCW90(it->S->coord);
   }
 }

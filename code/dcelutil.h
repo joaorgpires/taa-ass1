@@ -18,9 +18,12 @@ class dcel {
 public:
   dcel();
 
-  void init_poly(Polygon p);
-  void print_dcel();
-  void sweep_line();
+  void init_poly(Polygon prev);
+  void print_dcel(bool vertical);
+  void sweep_line(bool vertical);
+  void vertical_init(Polygon p);
+  void init_hole(Polygon hole);
+  void vertical_hole(Polygon hole);
 
 private:
   struct Vertex;
@@ -91,7 +94,10 @@ private:
   void splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y);
   void create_face_from(HalfEdge *e);
   void middle(HalfEdge *event, HalfEdge *connect);
-  //void middleLR(HalgEdge *event, HalfEdge *connect);
+  Polygon rotate_poly(Polygon prev);
+  Point rotateCCW90(Point p) { return Point(-p.Y, p.X); }
+  Point rotateCW90(Point p) { return Point(p.Y, -p.X); }
+  void rotate_partition();
 };
 
 #endif

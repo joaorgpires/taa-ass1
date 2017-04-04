@@ -1,8 +1,6 @@
 #ifndef geoutil_h
 #define geoutil_h
 
-#define INF 1000000000
-
 using namespace std;
 
 typedef long long int lld;
