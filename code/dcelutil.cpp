@@ -247,6 +247,7 @@ void dcel::splitHalfEdgeL(HalfEdge *split, HalfEdge *event, lld x, lld y, bool v
   }
 
   halfedges.erase(pii(split->origin->index, split->twin->origin->index));
+  halfedges.erase(pii(split->twin->origin->index, split->origin->index));
 
   HalfEdge *prev = split->prev;
   HalfEdge *next = split->next;
@@ -410,6 +411,7 @@ void dcel::splitHalfEdgeR(HalfEdge *split, HalfEdge *event, lld x, lld y, bool v
   }
 
   halfedges.erase(pii(split->origin->index, split->twin->origin->index));
+  halfedges.erase(pii(split->twin->origin->index, split->origin->index));
 
   HalfEdge *prev = split->prev;
   HalfEdge *next = split->next;
