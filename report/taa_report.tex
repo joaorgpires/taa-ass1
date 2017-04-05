@@ -7,7 +7,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[colorlinks=true, citecolor=blue, linkcolor=black]{hyperref}
 \usepackage{graphicx}
-\usepackage{natbib}
+% \usepackage{natbiba}
 \usepackage{amsmath}
 \usepackage{caption}
 \usepackage{subcaption}
@@ -214,7 +214,11 @@ Unfortunately, we were not able to complete the last one.
 
 Consider the example in Figure . %TODO adicionar referência \ref{fig:idea} à figura com \label{fig:idea} antes do ponto
 
-%FIGURA AQUI
+\begin{figure}[h!]
+  \centering \includegraphics[scale=0.2]{first.jpg}
+  \caption{Polygon with hole}
+  \label{fig:grid}
+\end{figure}
 
 In this example, we do not need to divide any extensions of events.
 
@@ -279,7 +283,7 @@ These were some tests we used to test the \textit{bulletproofness} of our algori
 
 0
 
-	\item Test 2 (with a hole and in Figure ): %TODO \ref para a figura com buraco)
+	\item Test 2 (with a hole and in Figure 5): %TODO \ref para a figura com buraco)
 
 0
 
@@ -359,7 +363,7 @@ These were some tests we used to test the \textit{bulletproofness} of our algori
 
 0 7
 
-	\item Test 4 (in Figure , with its output also visually represented): %TODO figura que diz AQUI, a do I
+	\item Test 4 (in Figure 6, with its output also visually represented): %TODO figura que diz AQUI, a do I
 1
 
 
@@ -392,6 +396,12 @@ These were some tests we used to test the \textit{bulletproofness} of our algori
 0
 
 \end{itemize}
+
+\begin{figure}[h!]
+  \centering \includegraphics[scale=0.2]{second.png}
+  \caption{Grid Partition Representation.}
+  \label{fig:grid}
+\end{figure}
 
 This implementation has a complexity $n$ $log(n)$, where $n$ is the number of edges of the polygon, for the sweep based parts. The implementation has output sensitive complexity in some parts, since it depends on the number of rectangles one gets from the grid partition.
 
