@@ -96,11 +96,11 @@ Lecture 2b: Subdivision representation and map overlay}, \url{http://www.cs.uu.n
 This structure allows us to easily build and traverse the polygon, as it is built using the half edges of the polygon and each half edge has the following attributes:
 
 \begin{enumerate}  
-\item \textbf{Next}: The half edge that comes after the one we are analysing
-\item \textbf{Incident}: The face in which that half edge is contained
-\item \textbf{Twin}: The reverse half edge to the one we are analysing, used to navigate through the polygon in reverse
-\item \textbf{Prev}: The half edge that comes before the one we are analysing
-\item \textbf{Origin}: The vertex in which this half edge originates
+\item \textbf{Next}: The half edge that comes after the one we are analysing;
+\item \textbf{Incident}: The face in which that half edge is contained;
+\item \textbf{Twin}: The reverse half edge to the one we are analysing, used to navigate through the polygon in reverse;
+\item \textbf{Prev}: The half edge that comes before the one we are analysing;
+\item \textbf{Origin}: The vertex from which this half edge originates.
 \end{enumerate}
 
 \begin{figure}[h!]
@@ -135,7 +135,7 @@ The figure above, shows us how the horizontal partition of an orthogonal polygon
 
 The black horizontal line is the sweep line, that goes from event to event looking for possible edge extensions. Each event is a horizontal half-edge, as described before.
 
-We can see the different types of intersections that occur, which we mentioned previously. The intersection between two inside vertexes, as we can see at the bottom of rectangle 6, and the intersection between an inside vertex and the vertical polygon wall that can be seen at the top of the rectangle numbered 9.
+We can see the different types of intersections that occur, which we mentioned previously. The intersection between two inside vertexes, as we can see at the bottom of rectangle 6, and the intersection between an inside vertex and the vertical polygon edge that can be seen at the top of the rectangle numbered 9.
 
 \subsection{Description of Data Structures Used and Others}\label{subsec:data}
 
@@ -150,36 +150,47 @@ The files \texttt{dcelutil.h} and \texttt{dcelutil.cpp} put together the impleme
 	\item \texttt{init\_hole}, which adds a hole to the DCEL representation given the points in clockwise direction.
 \end{itemize}
 
-These functions use within themselves functions like \texttt{splitHalfEdgeL}, that given an event, if by extending it we intersect a wall and this segment lyes completely inside the polygon, divides that wall in two, creating also two different faces induced by this division. It is observable that this division not always induces two different faces (because of the holes), but since given a half-edge its next component lyes on the same face as such half-edge, \texttt{create\_face\_from} assures that they are given the same face.
+These functions use within themselves functions like \texttt{splitHalfEdgeL}, that given an event, if by extending it we intersect a side of the polygon and this segment lyes completely inside the polygon, divides that segment in two, creating also two different faces induced by this division. It is observable that this division does not always induce two different faces (because of the holes), but since given a half-edge its next component lyes on the same face as such half-edge, \texttt{create\_face\_from} assures that they are given the same face.
 
 This function, \texttt{splitHalfEdgeL}, can be used in two different situations:
 
 \begin{enumerate}
-	\item If the event is from right to left, the wall of the polygon is on its left, and on the left of such event there is a piece that goes \textit{upwards} in our polygon;
-	\item If the event is from left to right, the wall of the polygon is on its right, and on the right of such event there is a piece that goes \textit{downwards} in our polygon.
+	\item If the event is from right to left, the edge of the polygon is on its left, and on the left of such event there is a piece that goes \textit{upwards} in our polygon;
+	\item If the event is from left to right, the edge of the polygon is on its right, and on the right of such event there is a piece that goes \textit{downwards} in our polygon.
 \end{enumerate}
 
 \texttt{splitHalfEdgeR} can be used for the other two cases that we can get.
 
 \subsection{\texttt{map} Data Structure in \texttt{C++} and the State of the Sweep Line}
 
-For representing the state of the sweep line we used a \texttt{map} in \texttt{C++}, since they are implemented as a red-black trees, which provide searching, removing and inserting operations in $log(n)$, giving a complexity for the sweep line algorithm of $n$ $log(n)$, where $n$ is the number of edges.
+For representing the state of the sweep line we used a \texttt{map} in \texttt{C++}, since they are implemented as red-black trees, which provide searching, removing and inserting operations in $log(n)$, giving a complexity for the sweep line algorithm of $n$ $log(n)$, where $n$ is the number of edges.
 
 \texttt{set} is another data structure in \texttt{C++} implemented using red-black trees.
 
 \subsection{Bulletproofness of our Implementation}\label{subsec:bullet}
 
-One question that rises is why is not the grid partition complete, as well as the second and third questions.
+One question that rises is why is the grid partition not complete, as well as the second and third questions.
 
 In this subsection we discuss why it took us so long to build the horizontal partition.
+
+The first observation is that, contrary to what we had expected, it is equivalent for the purpose of constructing partitions for a polygon to have holes or not. Our algorithm does not partition the inside face of a hole, since the half-edges that lye inside it are never added neither to the events nor to the state of the sweep line.
+
+So where is the problem? The problem is with the fact that the polygon, as well as the holes, can have collinear edges. This makes the task of building a partition harder, since we may need to add edges related to an unprocessed event in an event before. In order to make sure that the partition is well constructed, a lot of different cases needed to be considered, and in order to accomplish a bulletproof algorithm, we spent a lot of time thinking about every single possible case that might arise. Even so, we spent way too long fixing problems and bugs in our implementation that would not pass our \textit{bulletproofness test} cases. Some are described in section \ref{sec:input_final}.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 4
 %----------------------------------------------------------------------------------------
 \section{Grid Partition}\label{sec:grid}
-For the grid partition we need both the horizontal and vertical partitions in place.\\
-For the vertical partition we used a very similar idea to the horizontal one, with some slight differences.\\
-We would "rotate" the polygon 90 degrees, and execute the horizontal partition. This would work because when the polygon is rotated, the vertical edges become horizontal and vice-versa, so if we were to execute the algorithm for the horizontal partition on the rotated polygon, and then rotate it back to the original position, the partition would become vertical.
+
+In order to get the grid partition, we tried to think a bit out of the box, giving an idea that used most of the code we already had. Our implementation idea is as follows:
+
+\begin{itemize}
+	\item We begin by rotating the polygon $90^{\circ}$ in CCW (we can revert this by rotating it $90^{\circ}$ in CW) and is illustrated in Figure \ref{fig:rot};
+	\item We semi-construct the partition induced by a horizontal sweep on such rotated polygon;
+	\item This semi-construction is achieved simply by storing the points of intersection of the extensions of the events with the sides of the polygon, as well as the direction of the inside half-edge, given its endpoints' vertexes' indexes (which are preserved after rotations);
+	\item In the DCEL representing the horizontal partition, add these points, that we call \textbf{interest points}, to the representation, dividing the horizontal edges of the polygon accordingly;
+	\item Since the grid partition produces faces that are rectangles, and we already have all interest points on the sides of the polygon (and on the sides of the holes, if any), we can now search for the rectangles in a way that if a face is not a rectangle, make it a rectangle. If the four endpoints of such polygon already exist, simply connect the two that are not connected, and create two new faces for each of the two faces induced by this connection. If one of the endpoints does not exist, we know that we are handling an extension of a horizontal event that needs to be divided in two. This idea is better explained with an example in Section \ref{subsec:gridex}.
+\end{itemize}
 
 \begin{figure}[h!]
   \centering \includegraphics[scale=0.5]{rotatedPoly.png}
@@ -187,12 +198,169 @@ We would "rotate" the polygon 90 degrees, and execute the horizontal partition. 
   \label{fig:rot}
 \end{figure}
 
+An example of a grid partition is given in Figure \ref{fig:grid}.
+
 \begin{figure}[h!]
   \centering \includegraphics[scale=0.5]{gridPartition.png}
   \caption{Grid Partition Representation.}
   \label{fig:grid}
 \end{figure}
 
-All that is left now to complete our grid partition, is to join both the horizontal and vertical partitions. We do that by finding the points of interest in the vertical partition. These points will be the intersections of both partitions.
+The first four points of our idea for the grid partition are implemented and working. If we give the option to construct the grid partition, our algorithm already prints the DCEL after adding the interest points.
+
+Unfortunately, we were not able to complete the last one.
+
+\subsection{Our Idea for the Grid Partition - An Example}\label{subsec:gridex}
+
+Consider the example in Figure . %TODO adicionar referência \ref{fig:idea} à figura com \label{fig:idea} antes do ponto
+
+%FIGURA AQUI
+
+In this example, we do not need to divide any extensions of events.
+
+First of all, we need to get the horizontal half-edges that are candidates for searching for rectangles. We can do this in linear time on the number of rectangles generated by the grid partition, using the map of half-edges (that maps vertex indexes $v_{i}, v_{j}$ into half-edges with direction $\overrightarrow{v_{i} v_{j}}$), alongside with the faces (ordered first by $y$ and then by $x$; we can also use a map for this).
+
+Then, we proceed as we explain with an example so it is easier to understand our idea. Let us take half-edge $\overrightarrow{v_{0}  v_{12}}$, for instance. If we search for two previous half-edges prior to that, we get to $\overrightarrow{v_{10} v_{11}}$. Since the origin of this half-edge has already $x$-coordinate same as $v_{0}$, we do not need to divide half-edge $\overrightarrow{v_{10} v_{11}}$. On the other hand, since the half-edge previous to $\overrightarrow{v_{10} v_{11}}$ is not a half-edge with origin $v_{12}$, we need to connect $v_{12}$ to $v_{10}$, and $v_{10}$ to $v_{12}$.
+
+We continue to do this until we have no more faces to visit, obtaining then the grid partition as we desired.
+
+%----------------------------------------------------------------------------------------
+%	SECTION 5
+%-----------------------
+
+\section{Input Tests and Final Remarks}\label{sec:input_final}
+
+These were some tests we used to test the \textit{bulletproofness} of our algorithm:
+\begin{itemize}
+	\item Test 1:
+1
+
+20
+
+0 0
+
+9 0
+
+9 1
+
+8 1
+
+8 3
+
+7 3
+
+7 2
+
+6 2
+
+6 3
+
+5 3
+
+5 1
+
+4 1
+
+4 3
+
+3 3
+
+3 2
+
+2 2
+
+2 3
+
+1 3
+
+1 1
+
+0 1
+
+0
+
+	\item Test 2 (with a hole and in Figure ): %TODO \ref para a figura com buraco)
+
+0
+
+12
+
+0 0
+
+5 0
+
+5 4
+
+4 4
+
+4 3
+
+3 3
+
+3 4
+
+2 4
+
+2 3
+
+1 3
+
+1 4
+
+0 4
+
+1
+
+4
+
+2 1
+
+2 2
+
+3 2
+
+3 1
+
+	\item Test 3:
+
+0
+
+16
+
+0 5
+
+2 5
+
+2 3
+
+4 3
+
+4 1
+
+6 1
+
+6 0
+
+7 0
+
+7 2
+
+5 2
+
+5 4
+
+3 4
+
+3 6
+
+1 6
+
+1 7
+
+0 7
+
+\end{itemize}
+
+This implementation has a complexity $n$ $log(n)$, where $n$ is the number of edges of the polygon, for the sweep based parts. The implementation has output sensitive complexity in some parts, since it depends on the number of rectangles one gets from the grid partition.
 
 \end{document}
