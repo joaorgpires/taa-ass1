@@ -15,3 +15,6 @@ Exploit the DCEL constructed in **Question 1** to compute the region that is *re
 
 ### Question 3
 Study experimentally the minimum vertex guard problem for orthogonal polygons, under rectangular visibility with the restriction that each point must be visible to at least *k* guards (with *k* defined as a parameter).
+
+### TODO
+Vertical partition is not yet finished. Questions 2 and 3 are not finished yet.
